@@ -1,0 +1,20 @@
+{
+  "name": "nl9",
+  "version": "1.0.0",
+  "description": "Development boilerplate for Vite, TypeScript, and Phaser",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "^3.55.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.5",
+    "vite": "^2.4.4"
+  },
+  "author": "",
+  "license": "ISC"
+}
