@@ -16,10 +16,15 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	create() {
+		const width = 25;
+		const height = 19;
+		const defaultTileIndex = 0;
+		const data = Array.from({ length: height }, () => Array(width).fill(defaultTileIndex));
+
 		this.tilemap = this.make.tilemap({
-			data: [],
-			width: 25,
-			height: 19,
+			data: data,
+			width: width,
+			height: height,
 			tileWidth: 32,
 			tileHeight: 32,
 		});
