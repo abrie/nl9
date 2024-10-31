@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { generateSolidColorTexture } from "./TextureGenerator";
+import MapGenerator from "./MapGenerator";
 
 class MapManager {
 	private tilemap: Phaser.Tilemaps.Tilemap;
@@ -18,55 +19,72 @@ class MapManager {
 	create() {
 		const width = 25;
 		const height = 19;
-		const defaultTileIndex = 0;
-		const data = Array.from({ length: height }, () =>
-			Array(width).fill(defaultTileIndex),
+		const initialFillProbability = 0.45;
+		const numberOfIterations = 5;
+		const birthLimit = 4;
+		const deathLimit = 3;
+
+		const mapGenerator = new MapGenerator(
+			width,
+			height,
+			initialFillProbability,
+			numberOfIterations,
+			birthLimit,
+			deathLimit
 		);
 
-		this.tilemap = this.scene.make.tilemap({
-			data: data,
-			width: width,
-			height: height,
-			tileWidth: 32,
-			tileHeight: 32,
-		});
+		const map = mapGenerator.generateMap();
+		this.populateTilemap(map, width, height);
+	}
 
-		const unfilledTileset = this.tilemap.addTilesetImage(
-			"unfilled",
-			undefined,
-			32,
-			32,
-			0,
-			0,
-			1,
-		);
-		this.tilemap.addTilesetImage;
-		const filledTileset = this.tilemap.addTilesetImage(
-			"filled",
-			undefined,
-			32,
-			32,
-			0,
-			0,
-			2,
-		);
+	populateTilemap(map: number[][], width: number, height: number) {
+		if (!this.tilemap) {
+			this.tilemap = this.scene.make.tilemap({
+				data: map,
+				width: width,
+				height: height,
+				tileWidth: 32,
+				tileHeight: 32,
+			});
 
-		this.tilemap.tilesets.forEach((tileset) => console.log(tileset));
-		if (unfilledTileset === null || filledTileset === null) {
-			throw new Error("Unable to add tileset image.");
+			const unfilledTileset = this.tilemap.addTilesetImage(
+				"unfilled",
+				undefined,
+				32,
+				32,
+				0,
+				0,
+				1,
+			);
+			this.tilemap.addTilesetImage;
+			const filledTileset = this.tilemap.addTilesetImage(
+				"filled",
+				undefined,
+				32,
+				32,
+				0,
+				0,
+				2,
+			);
+
+			this.tilemap.tilesets.forEach((tileset) => console.log(tileset));
+			if (unfilledTileset === null || filledTileset === null) {
+				throw new Error("Unable to add tileset image.");
+			}
+			this.layer = this.tilemap.createLayer(
+				0,
+				[unfilledTileset, filledTileset],
+				0,
+				0,
+			);
 		}
-		this.layer = this.tilemap.createLayer(
-			0,
-			[unfilledTileset, filledTileset],
-			0,
-			0,
-		);
+
 		for (let y = 0; y < this.tilemap.height; y++) {
 			for (let x = 0; x < this.tilemap.width; x++) {
 				this.layer.putTileAt(
-					Math.random() > 0.5
-						? filledTileset.firstgid
-						: unfilledTileset.firstgid,
+					map[y][x] === 1
+						? this.tilemap.tilesets[1].firstgid
+						: this.tilemap.tilesets[0].firstgid,
 					x,
 					y,
 				);
