@@ -25,20 +25,27 @@ class PlayScene extends Phaser.Scene {
 		});
 
 		const unfilledTileset = this.tilemap.addTilesetImage("unfilled");
-		this.layer = this.tilemap.createLayer(1, this.tileset, 0, 0);
+		const filledTileset = this.tilemap.addTilesetImage("filled");
+		if (unfilledTileset === null || filledTileset === null) {
+			throw new Error("Unable to add tileset image.");
+		}
+		this.layer = this.tilemap.createLayer(
+			0,
+			[unfilledTileset, filledTileset],
+			0,
+			0,
+		);
 		for (let y = 0; y < this.tilemap.height; y++) {
 			for (let x = 0; x < this.tilemap.width; x++) {
-				this.layer.putTileAt(unfilledTileset?.firstgid, x, y);
+				this.layer.putTileAt(filledTileset.firstgid, x, y);
 			}
 		}
 
-		// Randomly place filled tiles
-		const filledTileset = this.tilemap.addTilesetImage("filled");
 		for (let y = 0; y < this.tilemap.height; y++) {
 			for (let x = 0; x < this.tilemap.width; x++) {
 				if (Math.random() < 0.2) {
 					// 20% chance to place a filled tile
-					this.layer.putTileAt(filledTileset?.firstgid, x, y);
+					this.layer.putTileAt(unfilledTileset.firstgid, x, y);
 				}
 			}
 		}
