@@ -31,8 +31,8 @@ class PlayScene extends Phaser.Scene {
 			tileHeight: 32,
 		});
 
-		const unfilledTileset = this.tilemap.addTilesetImage("unfilled");
-		const filledTileset = this.tilemap.addTilesetImage("filled");
+		const unfilledTileset = this.tilemap.addTilesetImage("unfilled", undefined, 32, 32, 0, 0, 1);
+		const filledTileset = this.tilemap.addTilesetImage("filled", undefined, 32, 32, 0, 0, 2);
 
 		this.tilemap.tilesets.forEach((tileset) => console.log(tileset));
 		if (unfilledTileset === null || filledTileset === null) {
