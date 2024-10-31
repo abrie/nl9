@@ -11,8 +11,8 @@ class PlayScene extends Phaser.Scene {
   }
 
   preload() {
-    this.textures.generate('unfilled', { data: generateSolidColorTexture(0xff0000), width: 32, height: 32 });
-    this.textures.generate('filled', { data: generateSolidColorTexture(0x00ff00), width: 32, height: 32 });
+    generateSolidColorTexture('unfilled', 0xff0000, 32, 32);
+    generateSolidColorTexture('filled', 0x00ff00, 32, 32);
   }
 
   create() {
