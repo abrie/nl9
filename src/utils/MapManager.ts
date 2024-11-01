@@ -3,8 +3,8 @@ import { generateSolidColorTexture } from "./TextureGenerator";
 import MapGenerator from "./MapGenerator";
 
 class MapManager {
-	private tilemap: Phaser.Tilemaps.Tilemap;
-	private layer: Phaser.Tilemaps.TilemapLayer;
+	private tilemap!: Phaser.Tilemaps.Tilemap;
+	private layer!: Phaser.Tilemaps.TilemapLayer;
 	private scene: Phaser.Scene;
 
 	constructor(scene: Phaser.Scene) {
@@ -12,8 +12,8 @@ class MapManager {
 	}
 
 	preload() {
-		generateSolidColorTexture(this.scene, "unfilled", 0xff0000, 32, 32);
-		generateSolidColorTexture(this.scene, "filled", 0xf0ff00, 32, 32);
+		generateSolidColorTexture(this.scene, "unfilled", 0x00aa00, 32, 32);
+		generateSolidColorTexture(this.scene, "filled", 0x000000, 32, 32);
 	}
 
 	create() {
@@ -30,7 +30,7 @@ class MapManager {
 			initialFillProbability,
 			numberOfIterations,
 			birthLimit,
-			deathLimit
+			deathLimit,
 		);
 
 		const map = mapGenerator.generateMap();
@@ -67,16 +67,20 @@ class MapManager {
 				2,
 			);
 
-			this.tilemap.tilesets.forEach((tileset) => console.log(tileset));
 			if (unfilledTileset === null || filledTileset === null) {
 				throw new Error("Unable to add tileset image.");
 			}
-			this.layer = this.tilemap.createLayer(
+			const layer = this.tilemap.createLayer(
 				0,
 				[unfilledTileset, filledTileset],
 				0,
 				0,
 			);
+			if (layer === null) {
+				throw new Error("Failed to create tilemap layer.");
+			} else {
+				this.layer = layer;
+			}
 		}
 
 		for (let y = 0; y < this.tilemap.height; y++) {

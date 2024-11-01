@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import MapManager from "../utils/MapManager";
 import MapGenerator from "../utils/MapGenerator";
 
@@ -29,7 +28,7 @@ class PlayScene extends Phaser.Scene {
 			initialFillProbability,
 			numberOfIterations,
 			birthLimit,
-			deathLimit
+			deathLimit,
 		);
 
 		const map = mapGenerator.generateMap();
