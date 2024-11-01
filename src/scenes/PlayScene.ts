@@ -4,6 +4,8 @@ import MapGenerator from "../utils/MapGenerator";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
+	private player!: Phaser.Physics.Arcade.Sprite;
+	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -12,6 +14,7 @@ class PlayScene extends Phaser.Scene {
 
 	preload() {
 		this.mapManager.preload();
+		this.load.image("player", "path/to/player/texture.png");
 	}
 
 	create() {
@@ -33,10 +36,30 @@ class PlayScene extends Phaser.Scene {
 
 		const map = mapGenerator.generateMap();
 		this.mapManager.populateTilemap(map, width, height);
+
+		this.player = this.physics.add.sprite(100, 100, "player");
+		this.player.setCollideWorldBounds(true);
+		this.player.setGravityY(300);
+
+		this.cursors = this.input.keyboard.createCursorKeys();
+
+		this.physics.add.collider(this.player, this.mapManager.layer);
+
+		this.mapManager.layer.setCollisionByExclusion([-1, 0]);
 	}
 
 	update() {
-		// Update game objects here
+		if (this.cursors.left.isDown) {
+			this.player.setVelocityX(-160);
+		} else if (this.cursors.right.isDown) {
+			this.player.setVelocityX(160);
+		} else {
+			this.player.setVelocityX(0);
+		}
+
+		if (this.cursors.up.isDown && this.player.body.touching.down) {
+			this.player.setVelocityY(-330);
+		}
 	}
 }
 
