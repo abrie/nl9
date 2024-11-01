@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import MapManager from "../utils/MapManager";
 import MapGenerator from "../utils/MapGenerator";
+import { generateSolidColorTexture } from "../utils/TextureGenerator";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -14,7 +15,7 @@ class PlayScene extends Phaser.Scene {
 
 	preload() {
 		this.mapManager.preload();
-		this.load.image("player", "path/to/player/texture.png");
+		generateSolidColorTexture(this, "player", 0x800080, 32, 32);
 	}
 
 	create() {
