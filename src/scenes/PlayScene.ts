@@ -45,8 +45,6 @@ class PlayScene extends Phaser.Scene {
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
-
-		this.mapManager.layer.setCollisionByExclusion([-1, 0]);
 	}
 
 	update() {

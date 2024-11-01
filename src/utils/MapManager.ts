@@ -94,6 +94,7 @@ class MapManager {
 				);
 			}
 		}
+		this.layer.setCollision(this.tilemap.tilesets[1].firstgid, true);
 	}
 }
 
