@@ -96,6 +96,25 @@ class MapManager {
 		}
 		this.layer.setCollision(this.tilemap.tilesets[1].firstgid, true);
 	}
+
+	getRandomNonWallPosition(map: number[][]): { x: number, y: number } {
+		const nonWallPositions: { x: number, y: number }[] = [];
+
+		for (let y = 0; y < map.length; y++) {
+			for (let x = 0; x < map[y].length; x++) {
+				if (map[y][x] === 0) {
+					nonWallPositions.push({ x, y });
+				}
+			}
+		}
+
+		if (nonWallPositions.length === 0) {
+			throw new Error("No non-wall positions available.");
+		}
+
+		const randomIndex = Math.floor(Math.random() * nonWallPositions.length);
+		return nonWallPositions[randomIndex];
+	}
 }
 
 export default MapManager;

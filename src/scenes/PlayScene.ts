@@ -38,13 +38,18 @@ class PlayScene extends Phaser.Scene {
 		const map = mapGenerator.generateMap();
 		this.mapManager.populateTilemap(map, width, height);
 
-		this.player = this.physics.add.sprite(100, 100, "player");
-		this.player.setCollideWorldBounds(true);
-		this.player.setGravityY(300);
+		this.createPlayer(map);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
+	}
+
+	createPlayer() {
+		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
+		this.player = this.physics.add.sprite(x * 32, y * 32, "player");
+		this.player.setCollideWorldBounds(true);
+		this.player.setGravityY(300);
 	}
 
 	update() {
