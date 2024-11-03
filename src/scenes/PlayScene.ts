@@ -56,7 +56,7 @@ class PlayScene extends Phaser.Scene {
 			this.player.setVelocityX(0);
 		}
 
-		if (this.cursors.up.isDown && this.player.body.touching.down) {
+		if (this.cursors.up.isDown && this.player.body?.blocked.down) {
 			this.player.setVelocityY(-330);
 		}
 	}
