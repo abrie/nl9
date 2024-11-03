@@ -15,6 +15,15 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.createMap();
+		this.createPlayer();
+	}
+
+	update() {
+		// Update game objects here
+	}
+
+	private createMap() {
 		const width = 25;
 		const height = 19;
 		const initialFillProbability = 0.45;
@@ -35,8 +44,14 @@ class PlayScene extends Phaser.Scene {
 		this.mapManager.populateTilemap(map, width, height);
 	}
 
-	update() {
-		// Update game objects here
+	private createPlayer() {
+		const nonWallSpaces = this.mapManager.getNonWallSpaces();
+		const randomIndex = Phaser.Math.Between(0, nonWallSpaces.length - 1);
+		const spawnPoint = nonWallSpaces[randomIndex];
+
+		// Create the player at the spawn point
+		const player = this.add.sprite(spawnPoint.x * 32, spawnPoint.y * 32, 'player');
+		this.physics.add.existing(player);
 	}
 }
 

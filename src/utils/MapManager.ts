@@ -95,6 +95,22 @@ class MapManager {
 			}
 		}
 	}
+
+	getRandomNonWallSpace(): { x: number, y: number } {
+		const nonWallSpaces: { x: number, y: number }[] = [];
+
+		for (let y = 0; y < this.tilemap.height; y++) {
+			for (let x = 0; x < this.tilemap.width; x++) {
+				const tile = this.layer.getTileAt(x, y);
+				if (tile && tile.index === this.tilemap.tilesets[0].firstgid) {
+					nonWallSpaces.push({ x, y });
+				}
+			}
+		}
+
+		const randomIndex = Phaser.Math.Between(0, nonWallSpaces.length - 1);
+		return nonWallSpaces[randomIndex];
+	}
 }
 
 export default MapManager;
