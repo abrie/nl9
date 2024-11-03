@@ -97,12 +97,13 @@ class MapManager {
 		this.layer.setCollision(this.tilemap.tilesets[1].firstgid, true);
 	}
 
-	getRandomNonWallPosition(map: number[][]): { x: number, y: number } {
+	getRandomNonWallPosition(): { x: number, y: number } {
 		const nonWallPositions: { x: number, y: number }[] = [];
 
-		for (let y = 0; y < map.length; y++) {
-			for (let x = 0; x < map[y].length; x++) {
-				if (map[y][x] === 0) {
+		for (let y = 0; y < this.tilemap.height; y++) {
+			for (let x = 0; x < this.tilemap.width; x++) {
+				const tile = this.tilemap.getTileAt(x, y);
+				if (tile && tile.index === this.tilemap.tilesets[0].firstgid) {
 					nonWallPositions.push({ x, y });
 				}
 			}
