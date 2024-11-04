@@ -125,11 +125,12 @@ class PlayScene extends Phaser.Scene {
 
 			this.grapplingHook.clear();
 		}
+		this.updateHud();
 	}
 
 	toggleMovementMode() {
 		this.movementMode = this.movementMode === 1 ? 2 : 1;
-		this.modeText.setText(`Mode: ${this.movementMode}`);
+		this.updateHud();
 	}
 
 	decreaseHyper() {
@@ -148,6 +149,11 @@ class PlayScene extends Phaser.Scene {
 
 	updateHyper() {
 		this.player.setGravityY(this.hyperValues[this.hyper].gravity);
+		this.updateHud();
+	}
+
+	updateHud() {
+		this.modeText.setText(`Mode: ${this.movementMode}`);
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
 	}
 
