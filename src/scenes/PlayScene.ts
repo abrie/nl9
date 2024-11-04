@@ -6,12 +6,17 @@ import { generateSolidColorTexture } from "../utils/TextureGenerator";
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
 	private player!: Phaser.Physics.Arcade.Sprite;
-	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+	private inputs!: {
+		up: boolean,
+		down: boolean,
+		left: boolean,
+		right: boolean,
+		z: boolean,
+		x: boolean,
+		c: boolean
+	};
 	private grapplingHook!: Phaser.GameObjects.Graphics;
 	private shiftKey!: Phaser.Input.Keyboard.Key;
-	private zKey!: Phaser.Input.Keyboard.Key;
-	private xKey!: Phaser.Input.Keyboard.Key;
-	private cKey!: Phaser.Input.Keyboard.Key;
 	private movementMode: number;
 	private acceleration: number;
 	private modeText!: Phaser.GameObjects.Text;
@@ -62,13 +67,9 @@ class PlayScene extends Phaser.Scene {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
 		this.createPlayer(x, y);
 
-		this.cursors = this.input.keyboard.createCursorKeys();
 		this.shiftKey = this.input.keyboard.addKey(
 			Phaser.Input.Keyboard.KeyCodes.SHIFT,
 		);
-		this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-		this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-		this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
@@ -76,9 +77,9 @@ class PlayScene extends Phaser.Scene {
 			lineStyle: { width: 2, color: 0xff0000 },
 		});
 
-		this.zKey.on("down", this.toggleMovementMode, this);
-		this.xKey.on("down", this.decreaseHyper, this);
-		this.cKey.on("down", this.increaseHyper, this);
+		this.input.keyboard.on("keydown-Z", this.toggleMovementMode, this);
+		this.input.keyboard.on("keydown-X", this.decreaseHyper, this);
+		this.input.keyboard.on("keydown-C", this.increaseHyper, this);
 
 		this.modeText = this.add.text(10, 10, "Mode: 1", {
 			fontSize: "16px",
@@ -98,12 +99,14 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	update() {
+		this.updateInputs();
+
 		if (this.shiftKey.isDown) {
 			this.player.setVelocityX(0);
 
-			if (this.cursors.up.isDown) {
+			if (this.inputs.up) {
 				this.player.setVelocityY(-160);
-			} else if (this.cursors.down.isDown) {
+			} else if (this.inputs.down) {
 				this.player.setVelocityY(160);
 			} else {
 				this.player.setVelocityY(0);
@@ -112,30 +115,48 @@ class PlayScene extends Phaser.Scene {
 			this.drawGrapplingHook();
 		} else {
 			if (this.movementMode === 1) {
-				if (this.cursors.left.isDown) {
+				if (this.inputs.left) {
 					this.player.setVelocityX(-160);
-				} else if (this.cursors.right.isDown) {
+				} else if (this.inputs.right) {
 					this.player.setVelocityX(160);
 				} else {
 					this.player.setVelocityX(0);
 				}
 			} else if (this.movementMode === 2) {
-				if (this.cursors.left.isDown) {
+				if (this.inputs.left) {
 					this.player.setAccelerationX(-this.acceleration);
-				} else if (this.cursors.right.isDown) {
+				} else if (this.inputs.right) {
 					this.player.setAccelerationX(this.acceleration);
 				} else {
 					this.player.setAccelerationX(0);
 				}
 			}
 
-			if (this.cursors.up.isDown && this.player.body?.blocked.down) {
+			if (this.inputs.up && this.player.body?.blocked.down) {
 				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 			}
 
 			this.grapplingHook.clear();
 		}
 		this.updateHud();
+	}
+
+	updateInputs() {
+		if (!this.input.keyboard) {
+			const errorMessage = "Keyboard input is not available.";
+			console.error(errorMessage);
+			throw new Error(errorMessage);
+		}
+
+		this.inputs = {
+			up: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.UP].isDown,
+			down: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.DOWN].isDown,
+			left: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.LEFT].isDown,
+			right: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.RIGHT].isDown,
+			z: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.Z].isDown,
+			x: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.X].isDown,
+			c: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.C].isDown
+		};
 	}
 
 	toggleMovementMode() {
