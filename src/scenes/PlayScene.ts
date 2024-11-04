@@ -70,7 +70,7 @@ class PlayScene extends Phaser.Scene {
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({
-			lineStyle: { width: 2, color: 0xff0000 },
+			lineStyle: { width: 2, color: 0x00ff00 },
 		});
 
 		this.modeText = this.add.text(10, 10, "Mode: 1", {
