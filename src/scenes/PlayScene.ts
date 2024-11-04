@@ -136,6 +136,16 @@ class PlayScene extends Phaser.Scene {
 			this.grapplingHook.clear();
 		}
 
+		if (this.grapplingHookDeployed) {
+			if (this.inputManager.inputs.up) {
+				this.player.setVelocityY(-160);
+			} else if (this.inputManager.inputs.down) {
+				this.player.setVelocityY(160);
+			} else {
+				this.player.setVelocityY(0);
+			}
+		}
+
 		this.updateHud();
 	}
 
