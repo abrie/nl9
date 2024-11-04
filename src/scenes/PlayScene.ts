@@ -210,33 +210,19 @@ class PlayScene extends Phaser.Scene {
 		const tileX = Math.floor(playerX / 32);
 		const tileY = Math.floor(playerY / 32);
 
-		const deployInterval = setInterval(() => {
-			this.grapplingHookLength += 5;
-			this.grapplingHook.clear();
-			this.grapplingHook.lineBetween(playerX, playerY, playerX, playerY - this.grapplingHookLength);
-
-			if (this.grapplingHookLength >= (tileY + 1) * 32) {
-				clearInterval(deployInterval);
-				this.grapplingHookDeploying = false;
-				this.grapplingHookDeployed = true;
-			}
-		}, 30);
+		this.grapplingHookLength = (tileY + 1) * 32;
+		this.grapplingHook.clear();
+		this.grapplingHook.lineBetween(playerX, playerY, playerX, playerY - this.grapplingHookLength);
+		this.grapplingHookDeploying = false;
+		this.grapplingHookDeployed = true;
 	}
 
 	retractGrapplingHook() {
 		this.grapplingHookRetracting = true;
-		const retractInterval = setInterval(() => {
-			this.grapplingHookLength -= 5;
-			this.grapplingHook.clear();
-			this.grapplingHook.lineBetween(this.player.x, this.player.y, this.player.x, this.player.y - this.grapplingHookLength);
-
-			if (this.grapplingHookLength <= 0) {
-				clearInterval(retractInterval);
-				this.grapplingHookRetracting = false;
-				this.grapplingHookDeployed = false;
-				this.grapplingHook.clear();
-			}
-		}, 30);
+		this.grapplingHookLength = 0;
+		this.grapplingHook.clear();
+		this.grapplingHookRetracting = false;
+		this.grapplingHookDeployed = false;
 	}
 }
 
