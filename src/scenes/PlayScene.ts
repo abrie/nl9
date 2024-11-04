@@ -27,10 +27,10 @@ class PlayScene extends Phaser.Scene {
 		this.hyper = 0;
 		this.hyperValues = [
 			{ gravity: 400, jump: -330 },
-			{ gravity: 533, jump: -440 },
-			{ gravity: 711, jump: -586 },
-			{ gravity: 948, jump: -781 },
-			{ gravity: 1264, jump: -1041 }
+			{ gravity: 800, jump: -440 },
+			{ gravity: 1066, jump: -586 },
+			{ gravity: 1422, jump: -781 },
+			{ gravity: 1896, jump: -1041 }
 		];
 	}
 
