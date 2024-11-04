@@ -17,7 +17,7 @@ class PlayScene extends Phaser.Scene {
 	private modeText!: Phaser.GameObjects.Text;
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
-	private hyperValues: { gravity: number, jump: number }[];
+	private hyperValues: { gravity: number; jump: number }[];
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -27,10 +27,10 @@ class PlayScene extends Phaser.Scene {
 		this.hyper = 0;
 		this.hyperValues = [
 			{ gravity: 400, jump: -330 },
-			{ gravity: 800, jump: -440 },
-			{ gravity: 1066, jump: -586 },
-			{ gravity: 1422, jump: -781 },
-			{ gravity: 1896, jump: -1041 }
+			{ gravity: 800 * 2, jump: -440 },
+			{ gravity: 1066 * 2, jump: -586 },
+			{ gravity: 1422 * 2, jump: -781 },
+			{ gravity: 1896 * 2, jump: -1041 },
 		];
 	}
 
@@ -62,21 +62,31 @@ class PlayScene extends Phaser.Scene {
 		this.createPlayer(map);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
-		this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+		this.shiftKey = this.input.keyboard.addKey(
+			Phaser.Input.Keyboard.KeyCodes.SHIFT,
+		);
 		this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
 		this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
 		this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
-		this.grapplingHook = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
+		this.grapplingHook = this.add.graphics({
+			lineStyle: { width: 2, color: 0xff0000 },
+		});
 
-		this.zKey.on('down', this.toggleMovementMode, this);
-		this.xKey.on('down', this.decreaseHyper, this);
-		this.cKey.on('down', this.increaseHyper, this);
+		this.zKey.on("down", this.toggleMovementMode, this);
+		this.xKey.on("down", this.decreaseHyper, this);
+		this.cKey.on("down", this.increaseHyper, this);
 
-		this.modeText = this.add.text(10, 10, 'Mode: 1', { fontSize: '16px', fill: '#fff' });
-		this.hyperText = this.add.text(10, 30, 'Hyper: 0', { fontSize: '16px', fill: '#fff' });
+		this.modeText = this.add.text(10, 10, "Mode: 1", {
+			fontSize: "16px",
+			fill: "#fff",
+		});
+		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
+			fontSize: "16px",
+			fill: "#fff",
+		});
 	}
 
 	createPlayer(map) {
