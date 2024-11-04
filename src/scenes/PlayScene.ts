@@ -122,6 +122,10 @@ class PlayScene extends Phaser.Scene {
 			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
+		if (this.inputManager.inputs.shift) {
+			this.drawGrapplingHook();
+		}
+
 		this.updateHud();
 	}
 
