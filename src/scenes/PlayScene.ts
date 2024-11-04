@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import MapManager from "../utils/MapManager";
 import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
+import InputManager from "../utils/InputManager";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -13,7 +14,7 @@ class PlayScene extends Phaser.Scene {
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
-	private inputs: { up: boolean; down: boolean; left: boolean; right: boolean; z: boolean; x: boolean; c: boolean };
+	private inputManager!: InputManager;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -28,15 +29,6 @@ class PlayScene extends Phaser.Scene {
 			{ gravity: 1422 * 2, jump: -781 },
 			{ gravity: 1896 * 2, jump: -1041 },
 		];
-		this.inputs = {
-			up: false,
-			down: false,
-			left: false,
-			right: false,
-			z: false,
-			x: false,
-			c: false,
-		};
 	}
 
 	preload() {
@@ -80,7 +72,8 @@ class PlayScene extends Phaser.Scene {
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
 			fill: "#fff",
-		});
+			});
+		this.inputManager = new InputManager(this);
 	}
 
 	createPlayer(x: number, y: number) {
@@ -91,59 +84,45 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	update() {
-		this.updateInputs();
+		this.inputManager.updateInputs();
 
-		if (this.inputs.z) {
+		if (this.inputManager.inputs.z) {
 			this.toggleMovementMode();
 		}
-		if (this.inputs.x) {
+		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
 		}
-		if (this.inputs.c) {
+		if (this.inputManager.inputs.c) {
 			this.increaseHyper();
 		}
 
-		if (this.inputs.up && this.player.body?.blocked.down) {
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
 			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
 		if (this.movementMode === 1) {
-			if (this.inputs.left) {
+			if (this.inputManager.inputs.left) {
 				this.player.setVelocityX(-160);
-			} else if (this.inputs.right) {
+			} else if (this.inputManager.inputs.right) {
 				this.player.setVelocityX(160);
 			} else {
 				this.player.setVelocityX(0);
 			}
 		} else if (this.movementMode === 2) {
-			if (this.inputs.left) {
+			if (this.inputManager.inputs.left) {
 				this.player.setAccelerationX(-this.acceleration);
-			} else if (this.inputs.right) {
+			} else if (this.inputManager.inputs.right) {
 				this.player.setAccelerationX(this.acceleration);
 			} else {
 				this.player.setAccelerationX(0);
 			}
 		}
 
-		if (this.inputs.up && this.player.body?.blocked.down) {
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
 			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
 		this.updateHud();
-	}
-
-	updateInputs() {
-		if (!this.input.keyboard) {
-			throw new Error("Keyboard input is not available.");
-		}
-
-		this.inputs.up = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP));
-		this.inputs.down = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN));
-		this.inputs.left = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT));
-		this.inputs.right = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT));
-		this.inputs.z = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z));
-		this.inputs.x = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X));
-		this.inputs.c = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C));
 	}
 
 	toggleMovementMode() {
