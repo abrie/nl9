@@ -9,10 +9,16 @@ class PlayScene extends Phaser.Scene {
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private grapplingHook!: Phaser.GameObjects.Graphics;
 	private shiftKey!: Phaser.Input.Keyboard.Key;
+	private zKey!: Phaser.Input.Keyboard.Key;
+	private movementMode: number;
+	private acceleration: number;
+	private modeText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
 		this.mapManager = new MapManager(this);
+		this.movementMode = 1;
+		this.acceleration = 300;
 	}
 
 	preload() {
@@ -44,10 +50,15 @@ class PlayScene extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+		this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
+
+		this.zKey.on('down', this.toggleMovementMode, this);
+
+		this.modeText = this.add.text(10, 10, 'Mode: 1', { fontSize: '16px', fill: '#fff' });
 	}
 
 	createPlayer(map) {
@@ -72,12 +83,22 @@ class PlayScene extends Phaser.Scene {
 
 			this.drawGrapplingHook();
 		} else {
-			if (this.cursors.left.isDown) {
-				this.player.setVelocityX(-160);
-			} else if (this.cursors.right.isDown) {
-				this.player.setVelocityX(160);
-			} else {
-				this.player.setVelocityX(0);
+			if (this.movementMode === 1) {
+				if (this.cursors.left.isDown) {
+					this.player.setVelocityX(-160);
+				} else if (this.cursors.right.isDown) {
+					this.player.setVelocityX(160);
+				} else {
+					this.player.setVelocityX(0);
+				}
+			} else if (this.movementMode === 2) {
+				if (this.cursors.left.isDown) {
+					this.player.setAccelerationX(-this.acceleration);
+				} else if (this.cursors.right.isDown) {
+					this.player.setAccelerationX(this.acceleration);
+				} else {
+					this.player.setAccelerationX(0);
+				}
 			}
 
 			if (this.cursors.up.isDown && this.player.body?.blocked.down) {
@@ -86,6 +107,11 @@ class PlayScene extends Phaser.Scene {
 
 			this.grapplingHook.clear();
 		}
+	}
+
+	toggleMovementMode() {
+		this.movementMode = this.movementMode === 1 ? 2 : 1;
+		this.modeText.setText(`Mode: ${this.movementMode}`);
 	}
 
 	drawGrapplingHook() {
