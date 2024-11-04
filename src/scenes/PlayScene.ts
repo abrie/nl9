@@ -129,6 +129,9 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		if (this.inputManager.inputs.shift) {
+			if (!this.grapplingHookDeployed) {
+				this.player.setVelocityX(0);
+			}
 			this.drawGrapplingHook();
 			this.grapplingHookDeployed = true;
 		} else {
