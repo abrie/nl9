@@ -16,6 +16,9 @@ class PlayScene extends Phaser.Scene {
 	private hyperValues: { gravity: number; jump: number }[];
 	private inputManager!: InputManager;
 	private grapplingHookDeployed: boolean;
+	private grapplingHookDeploying: boolean;
+	private grapplingHookRetracting: boolean;
+	private grapplingHookLength: number;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -31,6 +34,9 @@ class PlayScene extends Phaser.Scene {
 			{ gravity: 1896 * 2, jump: -1041 },
 		];
 		this.grapplingHookDeployed = false;
+		this.grapplingHookDeploying = false;
+		this.grapplingHookRetracting = false;
+		this.grapplingHookLength = 0;
 	}
 
 	preload() {
@@ -129,14 +135,14 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		if (this.inputManager.inputs.shift) {
-			if (!this.grapplingHookDeployed) {
+			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
 				this.player.setVelocityX(0);
+				this.deployGrapplingHook();
 			}
-			this.drawGrapplingHook();
-			this.grapplingHookDeployed = true;
 		} else {
-			this.grapplingHookDeployed = false;
-			this.grapplingHook.clear();
+			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
+				this.retractGrapplingHook();
+			}
 		}
 
 		if (this.grapplingHookDeployed) {
@@ -194,6 +200,43 @@ class PlayScene extends Phaser.Scene {
 				break;
 			}
 		}
+	}
+
+	deployGrapplingHook() {
+		this.grapplingHookDeploying = true;
+		this.grapplingHookLength = 0;
+		const playerX = this.player.x;
+		const playerY = this.player.y;
+		const tileX = Math.floor(playerX / 32);
+		const tileY = Math.floor(playerY / 32);
+
+		const deployInterval = setInterval(() => {
+			this.grapplingHookLength += 5;
+			this.grapplingHook.clear();
+			this.grapplingHook.lineBetween(playerX, playerY, playerX, playerY - this.grapplingHookLength);
+
+			if (this.grapplingHookLength >= (tileY + 1) * 32) {
+				clearInterval(deployInterval);
+				this.grapplingHookDeploying = false;
+				this.grapplingHookDeployed = true;
+			}
+		}, 30);
+	}
+
+	retractGrapplingHook() {
+		this.grapplingHookRetracting = true;
+		const retractInterval = setInterval(() => {
+			this.grapplingHookLength -= 5;
+			this.grapplingHook.clear();
+			this.grapplingHook.lineBetween(this.player.x, this.player.y, this.player.x, this.player.y - this.grapplingHookLength);
+
+			if (this.grapplingHookLength <= 0) {
+				clearInterval(retractInterval);
+				this.grapplingHookRetracting = false;
+				this.grapplingHookDeployed = false;
+				this.grapplingHook.clear();
+			}
+		}, 30);
 	}
 }
 
