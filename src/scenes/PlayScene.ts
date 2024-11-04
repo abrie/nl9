@@ -47,7 +47,7 @@ class PlayScene extends Phaser.Scene {
 
 	createPlayer(map) {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
-		this.player = this.physics.add.sprite(x * 32, y * 32, "player");
+		this.player = this.physics.add.sprite(x * 32 + 16, y * 32 + 16, "player");
 		this.player.setCollideWorldBounds(true);
 		this.player.setGravityY(300);
 		this.player.setOrigin(0.5, 0.5);
