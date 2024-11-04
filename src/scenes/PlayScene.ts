@@ -6,23 +6,14 @@ import { generateSolidColorTexture } from "../utils/TextureGenerator";
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
 	private player!: Phaser.Physics.Arcade.Sprite;
-	private inputs!: {
-		up: boolean,
-		down: boolean,
-		left: boolean,
-		right: boolean,
-		z: boolean,
-		x: boolean,
-		c: boolean
-	};
 	private grapplingHook!: Phaser.GameObjects.Graphics;
-	private shiftKey!: Phaser.Input.Keyboard.Key;
 	private movementMode: number;
 	private acceleration: number;
 	private modeText!: Phaser.GameObjects.Text;
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
+	private inputs: { up: boolean; down: boolean; left: boolean; right: boolean; z: boolean; x: boolean; c: boolean };
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -37,6 +28,15 @@ class PlayScene extends Phaser.Scene {
 			{ gravity: 1422 * 2, jump: -781 },
 			{ gravity: 1896 * 2, jump: -1041 },
 		];
+		this.inputs = {
+			up: false,
+			down: false,
+			left: false,
+			right: false,
+			z: false,
+			x: false,
+			c: false,
+		};
 	}
 
 	preload() {
@@ -67,19 +67,11 @@ class PlayScene extends Phaser.Scene {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
 		this.createPlayer(x, y);
 
-		this.shiftKey = this.input.keyboard.addKey(
-			Phaser.Input.Keyboard.KeyCodes.SHIFT,
-		);
-
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({
 			lineStyle: { width: 2, color: 0xff0000 },
 		});
-
-		this.input.keyboard.on("keydown-Z", this.toggleMovementMode, this);
-		this.input.keyboard.on("keydown-X", this.decreaseHyper, this);
-		this.input.keyboard.on("keydown-C", this.increaseHyper, this);
 
 		this.modeText = this.add.text(10, 10, "Mode: 1", {
 			fontSize: "16px",
@@ -101,62 +93,57 @@ class PlayScene extends Phaser.Scene {
 	update() {
 		this.updateInputs();
 
-		if (this.shiftKey.isDown) {
-			this.player.setVelocityX(0);
-
-			if (this.inputs.up) {
-				this.player.setVelocityY(-160);
-			} else if (this.inputs.down) {
-				this.player.setVelocityY(160);
-			} else {
-				this.player.setVelocityY(0);
-			}
-
-			this.drawGrapplingHook();
-		} else {
-			if (this.movementMode === 1) {
-				if (this.inputs.left) {
-					this.player.setVelocityX(-160);
-				} else if (this.inputs.right) {
-					this.player.setVelocityX(160);
-				} else {
-					this.player.setVelocityX(0);
-				}
-			} else if (this.movementMode === 2) {
-				if (this.inputs.left) {
-					this.player.setAccelerationX(-this.acceleration);
-				} else if (this.inputs.right) {
-					this.player.setAccelerationX(this.acceleration);
-				} else {
-					this.player.setAccelerationX(0);
-				}
-			}
-
-			if (this.inputs.up && this.player.body?.blocked.down) {
-				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
-			}
-
-			this.grapplingHook.clear();
+		if (this.inputs.z) {
+			this.toggleMovementMode();
 		}
+		if (this.inputs.x) {
+			this.decreaseHyper();
+		}
+		if (this.inputs.c) {
+			this.increaseHyper();
+		}
+
+		if (this.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
+
+		if (this.movementMode === 1) {
+			if (this.inputs.left) {
+				this.player.setVelocityX(-160);
+			} else if (this.inputs.right) {
+				this.player.setVelocityX(160);
+			} else {
+				this.player.setVelocityX(0);
+			}
+		} else if (this.movementMode === 2) {
+			if (this.inputs.left) {
+				this.player.setAccelerationX(-this.acceleration);
+			} else if (this.inputs.right) {
+				this.player.setAccelerationX(this.acceleration);
+			} else {
+				this.player.setAccelerationX(0);
+			}
+		}
+
+		if (this.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
+
 		this.updateHud();
 	}
 
 	updateInputs() {
 		if (!this.input.keyboard) {
-			const errorMessage = "Keyboard input is not available.";
-			console.error(errorMessage);
-			throw new Error(errorMessage);
+			throw new Error("Keyboard input is not available.");
 		}
 
-		this.inputs = {
-			up: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.UP].isDown,
-			down: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.DOWN].isDown,
-			left: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.LEFT].isDown,
-			right: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.RIGHT].isDown,
-			z: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.Z].isDown,
-			x: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.X].isDown,
-			c: this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.C].isDown
-		};
+		this.inputs.up = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP));
+		this.inputs.down = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN));
+		this.inputs.left = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT));
+		this.inputs.right = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT));
+		this.inputs.z = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z));
+		this.inputs.x = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X));
+		this.inputs.c = Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C));
 	}
 
 	toggleMovementMode() {
