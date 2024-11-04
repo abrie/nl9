@@ -98,7 +98,7 @@ class PlayScene extends Phaser.Scene {
 			const tile = this.mapManager.layer.getTileAt(tileX, y);
 			if (tile && tile.index === this.mapManager.layer.tileset[1].firstgid) {
 				this.grapplingHook.clear();
-				this.grapplingHook.lineBetween(playerX, playerY, playerX, y * 32);
+				this.grapplingHook.lineBetween(playerX, playerY, playerX, (y + 1) * 32);
 				break;
 			}
 		}
