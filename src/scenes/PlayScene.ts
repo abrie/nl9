@@ -149,7 +149,6 @@ class PlayScene extends Phaser.Scene {
 
 	updateHyper() {
 		this.player.setGravityY(this.hyperValues[this.hyper].gravity);
-		this.updateHud();
 	}
 
 	updateHud() {
