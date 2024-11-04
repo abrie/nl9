@@ -9,10 +9,15 @@ class PlayScene extends Phaser.Scene {
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private grapplingHook!: Phaser.GameObjects.Graphics;
 	private shiftKey!: Phaser.Input.Keyboard.Key;
+	private hyper: number;
+	private xKey!: Phaser.Input.Keyboard.Key;
+	private cKey!: Phaser.Input.Keyboard.Key;
+	private hyperText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
 		this.mapManager = new MapManager(this);
+		this.hyper = 0;
 	}
 
 	preload() {
@@ -44,10 +49,14 @@ class PlayScene extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+		this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+		this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
+
+		this.hyperText = this.add.text(10, 10, `Hyper: ${this.hyper}`, { fontSize: '16px', fill: '#fff' });
 	}
 
 	createPlayer(map) {
@@ -81,13 +90,26 @@ class PlayScene extends Phaser.Scene {
 			}
 
 			if (this.cursors.up.isDown && this.player.body?.blocked.down) {
-				this.player.setVelocityY(-330);
+				this.player.setVelocityY(-330 * Math.pow(1.2, this.hyper));
 			}
 
 			this.grapplingHook.clear();
 		}
+
+		if (this.xKey.isDown && this.hyper > 0) {
+			this.hyper--;
+			this.updateHyper();
+		} else if (this.cKey.isDown && this.hyper < 4) {
+			this.hyper++;
+			this.updateHyper();
+		}
 	}
 
+	updateHyper() {
+		this.player.setGravityY(300 * Math.pow(1.5, this.hyper));
+		this.hyperText.setText(`Hyper: ${this.hyper}`);
+	}
+	
 	drawGrapplingHook() {
 		const playerX = this.player.x;
 		const playerY = this.player.y;
