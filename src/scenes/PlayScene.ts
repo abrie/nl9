@@ -10,15 +10,28 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHook!: Phaser.GameObjects.Graphics;
 	private shiftKey!: Phaser.Input.Keyboard.Key;
 	private zKey!: Phaser.Input.Keyboard.Key;
+	private xKey!: Phaser.Input.Keyboard.Key;
+	private cKey!: Phaser.Input.Keyboard.Key;
 	private movementMode: number;
 	private acceleration: number;
 	private modeText!: Phaser.GameObjects.Text;
+	private hyper: number;
+	private hyperText!: Phaser.GameObjects.Text;
+	private hyperValues: { gravity: number, jump: number }[];
 
 	constructor() {
 		super({ key: "PlayScene" });
 		this.mapManager = new MapManager(this);
 		this.movementMode = 1;
 		this.acceleration = 300;
+		this.hyper = 0;
+		this.hyperValues = [
+			{ gravity: 300, jump: -330 },
+			{ gravity: 400, jump: -440 },
+			{ gravity: 533, jump: -586 },
+			{ gravity: 711, jump: -781 },
+			{ gravity: 948, jump: -1041 }
+		];
 	}
 
 	preload() {
@@ -51,21 +64,26 @@ class PlayScene extends Phaser.Scene {
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 		this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+		this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+		this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
 
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
 
 		this.zKey.on('down', this.toggleMovementMode, this);
+		this.xKey.on('down', this.decreaseHyper, this);
+		this.cKey.on('down', this.increaseHyper, this);
 
 		this.modeText = this.add.text(10, 10, 'Mode: 1', { fontSize: '16px', fill: '#fff' });
+		this.hyperText = this.add.text(10, 30, 'Hyper: 0', { fontSize: '16px', fill: '#fff' });
 	}
 
 	createPlayer(map) {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
 		this.player = this.physics.add.sprite(x * 32 + 16, y * 32 + 16, "player");
 		this.player.setCollideWorldBounds(true);
-		this.player.setGravityY(300);
+		this.updateHyper();
 		this.player.setOrigin(0.5, 0.5);
 	}
 
@@ -102,7 +120,7 @@ class PlayScene extends Phaser.Scene {
 			}
 
 			if (this.cursors.up.isDown && this.player.body?.blocked.down) {
-				this.player.setVelocityY(-330);
+				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 			}
 
 			this.grapplingHook.clear();
@@ -112,6 +130,25 @@ class PlayScene extends Phaser.Scene {
 	toggleMovementMode() {
 		this.movementMode = this.movementMode === 1 ? 2 : 1;
 		this.modeText.setText(`Mode: ${this.movementMode}`);
+	}
+
+	decreaseHyper() {
+		if (this.hyper > 0) {
+			this.hyper--;
+			this.updateHyper();
+		}
+	}
+
+	increaseHyper() {
+		if (this.hyper < 4) {
+			this.hyper++;
+			this.updateHyper();
+		}
+	}
+
+	updateHyper() {
+		this.player.setGravityY(this.hyperValues[this.hyper].gravity);
+		this.hyperText.setText(`Hyper: ${this.hyper}`);
 	}
 
 	drawGrapplingHook() {
