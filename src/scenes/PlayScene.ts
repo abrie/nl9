@@ -210,15 +210,18 @@ class PlayScene extends Phaser.Scene {
 		const tileX = Math.floor(playerX / 32);
 		const tileY = Math.floor(playerY / 32);
 
+
 		this.grapplingHookLength = (tileY + 1) * 32;
 		this.grapplingHook.clear();
 		this.grapplingHook.lineBetween(playerX, playerY, playerX, playerY - this.grapplingHookLength);
 		this.grapplingHookDeploying = false;
 		this.grapplingHookDeployed = true;
+
 	}
 
 	retractGrapplingHook() {
 		this.grapplingHookRetracting = true;
+
 		this.grapplingHookLength = 0;
 		this.grapplingHook.clear();
 		this.grapplingHookRetracting = false;
