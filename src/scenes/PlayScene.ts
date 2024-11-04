@@ -15,6 +15,7 @@ class PlayScene extends Phaser.Scene {
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
 	private inputManager!: InputManager;
+	private grapplingHookDeployed: boolean;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -29,6 +30,7 @@ class PlayScene extends Phaser.Scene {
 			{ gravity: 1422 * 2, jump: -781 },
 			{ gravity: 1896 * 2, jump: -1041 },
 		];
+		this.grapplingHookDeployed = false;
 	}
 
 	preload() {
@@ -101,20 +103,24 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		if (this.movementMode === 1) {
-			if (this.inputManager.inputs.left) {
-				this.player.setVelocityX(-160);
-			} else if (this.inputManager.inputs.right) {
-				this.player.setVelocityX(160);
-			} else {
-				this.player.setVelocityX(0);
+			if (!this.grapplingHookDeployed) {
+				if (this.inputManager.inputs.left) {
+					this.player.setVelocityX(-160);
+				} else if (this.inputManager.inputs.right) {
+					this.player.setVelocityX(160);
+				} else {
+					this.player.setVelocityX(0);
+				}
 			}
 		} else if (this.movementMode === 2) {
-			if (this.inputManager.inputs.left) {
-				this.player.setAccelerationX(-this.acceleration);
-			} else if (this.inputManager.inputs.right) {
-				this.player.setAccelerationX(this.acceleration);
-			} else {
-				this.player.setAccelerationX(0);
+			if (!this.grapplingHookDeployed) {
+				if (this.inputManager.inputs.left) {
+					this.player.setAccelerationX(-this.acceleration);
+				} else if (this.inputManager.inputs.right) {
+					this.player.setAccelerationX(this.acceleration);
+				} else {
+					this.player.setAccelerationX(0);
+				}
 			}
 		}
 
@@ -124,6 +130,10 @@ class PlayScene extends Phaser.Scene {
 
 		if (this.inputManager.inputs.shift) {
 			this.drawGrapplingHook();
+			this.grapplingHookDeployed = true;
+		} else {
+			this.grapplingHookDeployed = false;
+			this.grapplingHook.clear();
 		}
 
 		this.updateHud();
