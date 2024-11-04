@@ -19,6 +19,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookDeploying: boolean;
 	private grapplingHookRetracting: boolean;
 	private grapplingHookLength: number;
+	private grapplingHookAnchorY: number | null;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -37,6 +38,7 @@ class PlayScene extends Phaser.Scene {
 		this.grapplingHookDeploying = false;
 		this.grapplingHookRetracting = false;
 		this.grapplingHookLength = 0;
+		this.grapplingHookAnchorY = null;
 	}
 
 	preload() {
@@ -148,11 +150,14 @@ class PlayScene extends Phaser.Scene {
 		if (this.grapplingHookDeployed) {
 			if (this.inputManager.inputs.up) {
 				this.player.setVelocityY(-160);
+				this.grapplingHookLength -= 160 / 60; // Adjust length as player moves up
 			} else if (this.inputManager.inputs.down) {
 				this.player.setVelocityY(160);
+				this.grapplingHookLength += 160 / 60; // Adjust length as player moves down
 			} else {
 				this.player.setVelocityY(0);
 			}
+			this.drawGrapplingHook();
 		}
 
 		this.updateHud();
@@ -189,16 +194,11 @@ class PlayScene extends Phaser.Scene {
 	drawGrapplingHook() {
 		const playerX = this.player.x;
 		const playerY = this.player.y;
-		const tileX = Math.floor(playerX / 32);
-		const tileY = Math.floor(playerY / 32);
 
-		for (let y = tileY; y >= 0; y--) {
-			const tile = this.mapManager.layer.getTileAt(tileX, y);
-			if (tile && tile.index === this.mapManager.layer.tileset[1].firstgid) {
-				this.grapplingHook.clear();
-				this.grapplingHook.lineBetween(playerX, playerY, playerX, (y + 1) * 32);
-				break;
-			}
+		if (this.grapplingHookAnchorY !== null) {
+			this.grapplingHook.clear();
+			this.grapplingHook.lineStyle(2, 0x00ff00, 1);
+			this.grapplingHook.lineBetween(playerX, playerY, playerX, this.grapplingHookAnchorY);
 		}
 	}
 
@@ -213,6 +213,7 @@ class PlayScene extends Phaser.Scene {
 		const firstWallTileY = this.mapManager.findFirstWallTileAbove(tileX, tileY);
 		if (firstWallTileY !== null) {
 			this.grapplingHookLength = playerY - (firstWallTileY + 1) * 32;
+			this.grapplingHookAnchorY = (firstWallTileY + 1) * 32;
 			this.drawGrapplingHook();
 		}
 
@@ -227,6 +228,7 @@ class PlayScene extends Phaser.Scene {
 		this.grapplingHook.clear();
 		this.grapplingHookRetracting = false;
 		this.grapplingHookDeployed = false;
+		this.grapplingHookAnchorY = null;
 	}
 }
 
