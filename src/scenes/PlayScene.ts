@@ -2,22 +2,19 @@ import Phaser from "phaser";
 import MapManager from "../utils/MapManager";
 import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
+import InputManager from "../utils/InputManager";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
 	private player!: Phaser.Physics.Arcade.Sprite;
-	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private grapplingHook!: Phaser.GameObjects.Graphics;
-	private shiftKey!: Phaser.Input.Keyboard.Key;
-	private zKey!: Phaser.Input.Keyboard.Key;
-	private xKey!: Phaser.Input.Keyboard.Key;
-	private cKey!: Phaser.Input.Keyboard.Key;
 	private movementMode: number;
 	private acceleration: number;
 	private modeText!: Phaser.GameObjects.Text;
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
+	private inputManager!: InputManager;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -62,23 +59,11 @@ class PlayScene extends Phaser.Scene {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
 		this.createPlayer(x, y);
 
-		this.cursors = this.input.keyboard.createCursorKeys();
-		this.shiftKey = this.input.keyboard.addKey(
-			Phaser.Input.Keyboard.KeyCodes.SHIFT,
-		);
-		this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-		this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-		this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
-
 		this.physics.add.collider(this.player, this.mapManager.layer);
 
 		this.grapplingHook = this.add.graphics({
 			lineStyle: { width: 2, color: 0xff0000 },
 		});
-
-		this.zKey.on("down", this.toggleMovementMode, this);
-		this.xKey.on("down", this.decreaseHyper, this);
-		this.cKey.on("down", this.increaseHyper, this);
 
 		this.modeText = this.add.text(10, 10, "Mode: 1", {
 			fontSize: "16px",
@@ -87,7 +72,8 @@ class PlayScene extends Phaser.Scene {
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
 			fill: "#fff",
-		});
+			});
+		this.inputManager = new InputManager(this);
 	}
 
 	createPlayer(x: number, y: number) {
@@ -98,43 +84,44 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	update() {
-		if (this.shiftKey.isDown) {
-			this.player.setVelocityX(0);
+		this.inputManager.updateInputs();
 
-			if (this.cursors.up.isDown) {
-				this.player.setVelocityY(-160);
-			} else if (this.cursors.down.isDown) {
-				this.player.setVelocityY(160);
-			} else {
-				this.player.setVelocityY(0);
-			}
-
-			this.drawGrapplingHook();
-		} else {
-			if (this.movementMode === 1) {
-				if (this.cursors.left.isDown) {
-					this.player.setVelocityX(-160);
-				} else if (this.cursors.right.isDown) {
-					this.player.setVelocityX(160);
-				} else {
-					this.player.setVelocityX(0);
-				}
-			} else if (this.movementMode === 2) {
-				if (this.cursors.left.isDown) {
-					this.player.setAccelerationX(-this.acceleration);
-				} else if (this.cursors.right.isDown) {
-					this.player.setAccelerationX(this.acceleration);
-				} else {
-					this.player.setAccelerationX(0);
-				}
-			}
-
-			if (this.cursors.up.isDown && this.player.body?.blocked.down) {
-				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
-			}
-
-			this.grapplingHook.clear();
+		if (this.inputManager.inputs.z) {
+			this.toggleMovementMode();
 		}
+		if (this.inputManager.inputs.x) {
+			this.decreaseHyper();
+		}
+		if (this.inputManager.inputs.c) {
+			this.increaseHyper();
+		}
+
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
+
+		if (this.movementMode === 1) {
+			if (this.inputManager.inputs.left) {
+				this.player.setVelocityX(-160);
+			} else if (this.inputManager.inputs.right) {
+				this.player.setVelocityX(160);
+			} else {
+				this.player.setVelocityX(0);
+			}
+		} else if (this.movementMode === 2) {
+			if (this.inputManager.inputs.left) {
+				this.player.setAccelerationX(-this.acceleration);
+			} else if (this.inputManager.inputs.right) {
+				this.player.setAccelerationX(this.acceleration);
+			} else {
+				this.player.setAccelerationX(0);
+			}
+		}
+
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
+
 		this.updateHud();
 	}
 
