@@ -45,7 +45,7 @@ class PlayScene extends Phaser.Scene {
 		this.physics.add.collider(this.player, this.mapManager.layer);
 	}
 
-	createPlayer() {
+	createPlayer(map) {
 		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
 		this.player = this.physics.add.sprite(x * 32, y * 32, "player");
 		this.player.setCollideWorldBounds(true);
