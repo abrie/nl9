@@ -123,6 +123,16 @@ class MapManager {
 		const randomIndex = Math.floor(Math.random() * nonWallPositions.length);
 		return nonWallPositions[randomIndex];
 	}
+
+	findFirstWallTileAbove(x: number, y: number): number | null {
+		for (let i = y; i >= 0; i--) {
+			const tile = this.layer.getTileAt(x, i);
+			if (tile && tile.index === this.layer.tileset[1].firstgid) {
+				return i;
+			}
+		}
+		return null;
+	}
 }
 
 export default MapManager;
