@@ -45,7 +45,21 @@ class MapGenerator {
       }
     }
 
+    this.fillEdgesWithWalls(map);
+
     return map;
+  }
+
+  private fillEdgesWithWalls(map: number[][]): void {
+    for (let y = 0; y < this.height; y++) {
+      map[y][0] = 1;
+      map[y][this.width - 1] = 1;
+    }
+
+    for (let x = 0; x < this.width; x++) {
+      map[0][x] = 1;
+      map[this.height - 1][x] = 1;
+    }
   }
 
   private simulateStep(map: number[][]): number[][] {

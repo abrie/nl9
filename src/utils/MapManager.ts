@@ -93,7 +93,15 @@ class MapManager {
 					y,
 				);
 			}
+			this.layer.putTileAt(this.tilemap.tilesets[1].firstgid, 0, y);
+			this.layer.putTileAt(this.tilemap.tilesets[1].firstgid, this.tilemap.width - 1, y);
 		}
+
+		for (let x = 0; x < this.tilemap.width; x++) {
+			this.layer.putTileAt(this.tilemap.tilesets[1].firstgid, x, 0);
+			this.layer.putTileAt(this.tilemap.tilesets[1].firstgid, x, this.tilemap.height - 1);
+		}
+
 		this.layer.setCollision(this.tilemap.tilesets[1].firstgid, true);
 	}
 
