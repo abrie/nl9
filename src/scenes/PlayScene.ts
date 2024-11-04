@@ -46,7 +46,8 @@ class PlayScene extends Phaser.Scene {
 		const map = mapGenerator.generateMap();
 		this.mapManager.populateTilemap(map, width, height);
 
-		this.createPlayer(map);
+		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
+		this.createPlayer(x, y);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
@@ -61,8 +62,7 @@ class PlayScene extends Phaser.Scene {
 		this.modeText = this.add.text(10, 10, 'Mode: 1', { fontSize: '16px', fill: '#fff' });
 	}
 
-	createPlayer(map) {
-		const { x, y } = this.mapManager.getRandomNonWallPosition(map);
+	createPlayer(x: number, y: number) {
 		this.player = this.physics.add.sprite(x * 32 + 16, y * 32 + 16, "player");
 		this.player.setCollideWorldBounds(true);
 		this.player.setGravityY(300);
