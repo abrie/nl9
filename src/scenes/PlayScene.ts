@@ -8,7 +8,6 @@ class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
 	private player!: Phaser.Physics.Arcade.Sprite;
 	private grapplingHook!: Phaser.GameObjects.Graphics;
-	private acceleration: number;
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
@@ -16,13 +15,11 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookDeployed: boolean;
 	private grapplingHookDeploying: boolean;
 	private grapplingHookRetracting: boolean;
-	private grapplingHookLength: number;
 	private grapplingHookAnchorY: number | null;
 
 	constructor() {
 		super({ key: "PlayScene" });
 		this.mapManager = new MapManager(this);
-		this.acceleration = 300;
 		this.hyper = 0;
 		this.hyperValues = [
 			{ gravity: 400, jump: -330 },
@@ -34,7 +31,6 @@ class PlayScene extends Phaser.Scene {
 		this.grapplingHookDeployed = false;
 		this.grapplingHookDeploying = false;
 		this.grapplingHookRetracting = false;
-		this.grapplingHookLength = 0;
 		this.grapplingHookAnchorY = null;
 	}
 
@@ -75,7 +71,7 @@ class PlayScene extends Phaser.Scene {
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
 			fill: "#fff",
-			});
+		});
 		this.inputManager = new InputManager(this);
 	}
 
@@ -128,10 +124,8 @@ class PlayScene extends Phaser.Scene {
 		if (this.grapplingHookDeployed) {
 			if (this.inputManager.inputs.up) {
 				this.player.setVelocityY(-160);
-				this.grapplingHookLength -= 160 / 60; // Adjust length as player moves up
 			} else if (this.inputManager.inputs.down) {
 				this.player.setVelocityY(160);
-				this.grapplingHookLength += 160 / 60; // Adjust length as player moves down
 			} else {
 				this.player.setVelocityY(0);
 			}
@@ -170,13 +164,17 @@ class PlayScene extends Phaser.Scene {
 		if (this.grapplingHookAnchorY !== null) {
 			this.grapplingHook.clear();
 			this.grapplingHook.lineStyle(2, 0x00ff00, 1);
-			this.grapplingHook.lineBetween(playerX, playerY, playerX, this.grapplingHookAnchorY);
+			this.grapplingHook.lineBetween(
+				playerX,
+				playerY,
+				playerX,
+				this.grapplingHookAnchorY,
+			);
 		}
 	}
 
 	deployGrapplingHook() {
 		this.grapplingHookDeploying = true;
-		this.grapplingHookLength = 0;
 		const playerX = this.player.x;
 		const playerY = this.player.y;
 		const tileX = Math.floor(playerX / 32);
@@ -184,7 +182,6 @@ class PlayScene extends Phaser.Scene {
 
 		const firstWallTileY = this.mapManager.findFirstWallTileAbove(tileX, tileY);
 		if (firstWallTileY !== null) {
-			this.grapplingHookLength = playerY - (firstWallTileY + 1) * 32;
 			this.grapplingHookAnchorY = (firstWallTileY + 1) * 32;
 			this.drawGrapplingHook();
 		}
@@ -196,7 +193,6 @@ class PlayScene extends Phaser.Scene {
 	retractGrapplingHook() {
 		this.grapplingHookRetracting = true;
 
-		this.grapplingHookLength = 0;
 		this.grapplingHook.clear();
 		this.grapplingHookRetracting = false;
 		this.grapplingHookDeployed = false;
