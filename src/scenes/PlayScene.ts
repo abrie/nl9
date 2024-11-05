@@ -4,7 +4,7 @@ import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import InputManager from "../utils/InputManager";
 import { TILE_SIZE } from "../utils/Constants";
-import { PlayerStateMachine } from "../utils/PlayerStateMachine";
+import { PlayerStateMachine, PlayerState } from "../utils/PlayerStateMachine";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
