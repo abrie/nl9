@@ -9,9 +9,11 @@ enum PlayerState {
 
 class PlayerStateMachine {
   private currentState: PlayerState;
+  private peakHeightReached: boolean;
 
   constructor() {
     this.currentState = PlayerState.Idle;
+    this.peakHeightReached = false;
   }
 
   public getCurrentState(): PlayerState {
@@ -41,7 +43,7 @@ class PlayerStateMachine {
         }
         break;
       case PlayerState.Jumping:
-        if (!isOnGround) {
+        if (!isOnGround && this.peakHeightReached) {
           this.currentState = PlayerState.Falling;
         } else if (input.shift) {
           this.currentState = PlayerState.Grappling;
@@ -72,6 +74,12 @@ class PlayerStateMachine {
           this.currentState = PlayerState.Idle;
         }
         break;
+    }
+  }
+
+  public updateVerticalVelocity(velocityY: number): void {
+    if (this.currentState === PlayerState.Jumping && velocityY >= 0) {
+      this.peakHeightReached = true;
     }
   }
 }
