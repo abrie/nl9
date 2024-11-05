@@ -4,6 +4,7 @@ import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import InputManager from "../utils/InputManager";
 import { TILE_SIZE } from "../utils/Constants";
+import { PlayerStateMachine } from "../utils/PlayerStateMachine";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -17,6 +18,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookDeploying: boolean;
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
+	private playerStateMachine!: PlayerStateMachine;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -73,6 +75,7 @@ class PlayScene extends Phaser.Scene {
 			fontSize: "16px",
 		});
 		this.inputManager = new InputManager(this);
+		this.playerStateMachine = new PlayerStateMachine();
 	}
 
 	createPlayer(x: number, y: number) {
@@ -96,33 +99,32 @@ class PlayScene extends Phaser.Scene {
 			this.increaseHyper();
 		}
 
-		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
-			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
-		}
+		const isOnGround = this.player.body?.blocked.down;
+		this.playerStateMachine.handleInput(this.inputManager.inputs, isOnGround);
 
-		if (!this.grapplingHookDeployed) {
-			if (this.inputManager.inputs.left) {
-				this.player.setVelocityX(-160);
-			} else if (this.inputManager.inputs.right) {
-				this.player.setVelocityX(160);
-			} else {
+		switch (this.playerStateMachine.getCurrentState()) {
+			case PlayerState.Idle:
 				this.player.setVelocityX(0);
-			}
-		}
-
-		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
-			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
-		}
-
-		if (this.inputManager.inputs.shift) {
-			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
+				break;
+			case PlayerState.Running:
+				if (this.inputManager.inputs.left) {
+					this.player.setVelocityX(-160);
+				} else if (this.inputManager.inputs.right) {
+					this.player.setVelocityX(160);
+				}
+				break;
+			case PlayerState.Jumping:
+				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+				break;
+			case PlayerState.Grappling:
 				this.player.setVelocityX(0);
 				this.deployGrapplingHook();
-			}
-		} else {
-			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
-				this.retractGrapplingHook();
-			}
+				break;
+			case PlayerState.Falling:
+				break;
+			case PlayerState.Gliding:
+				this.player.setVelocityY(-160);
+				break;
 		}
 
 		if (this.grapplingHookDeployed) {
