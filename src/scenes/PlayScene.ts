@@ -19,6 +19,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
 	private playerStateMachine!: PlayerStateMachine;
+	private stateText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -76,6 +77,12 @@ class PlayScene extends Phaser.Scene {
 		});
 		this.inputManager = new InputManager(this);
 		this.playerStateMachine = new PlayerStateMachine();
+
+		this.stateText = this.add.text(10, 50, "State: Idle", {
+			fontSize: "16px",
+			color: "#ffffff",
+			backgroundColor: "#000000"
+		});
 	}
 
 	createPlayer(x: number, y: number) {
@@ -139,6 +146,7 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		this.updateHud();
+		this.updateStateText();
 	}
 
 	decreaseHyper() {
@@ -161,6 +169,11 @@ class PlayScene extends Phaser.Scene {
 
 	updateHud() {
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
+	}
+
+	updateStateText() {
+		const state = PlayerState[this.playerStateMachine.getCurrentState()];
+		this.stateText.setText(`State: ${state}`);
 	}
 
 	drawGrapplingHook() {
