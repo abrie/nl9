@@ -75,7 +75,7 @@ class PlayScene extends Phaser.Scene {
 			fontSize: "16px",
 		});
 		this.inputManager = new InputManager(this);
-		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues);
+		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues, this.hyper);
 	}
 
 	createPlayer(x: number, y: number) {
@@ -113,6 +113,13 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		if (this.grapplingHookDeployed) {
+			if (this.inputManager.inputs.up) {
+				this.player.setVelocityY(-160);
+			} else if (this.inputManager.inputs.down) {
+				this.player.setVelocityY(160);
+			} else {
+				this.player.setVelocityY(0);
+			}
 			this.drawGrapplingHook();
 		}
 
