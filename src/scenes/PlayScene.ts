@@ -71,7 +71,6 @@ class PlayScene extends Phaser.Scene {
 
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
-			fill: "#fff",
 		});
 		this.inputManager = new InputManager(this);
 	}
@@ -168,7 +167,7 @@ class PlayScene extends Phaser.Scene {
 
 		if (this.grapplingHookAnchorY !== null) {
 			this.grapplingHook.clear();
-			this.grapplingHook.lineStyle(2, 0x00ff00, 1);
+			this.grapplingHook.lineStyle(4, 0x00ff00, 1);
 			this.grapplingHook.lineBetween(
 				playerX,
 				playerY,
@@ -187,7 +186,7 @@ class PlayScene extends Phaser.Scene {
 
 		const firstWallTileY = this.mapManager.findFirstWallTileAbove(tileX, tileY);
 		if (firstWallTileY !== null) {
-			this.grapplingHookAnchorY = (firstWallTileY + 1) * 32;
+			this.grapplingHookAnchorY = (firstWallTileY + 1) * TILE_SIZE;
 			this.drawGrapplingHook();
 		}
 
