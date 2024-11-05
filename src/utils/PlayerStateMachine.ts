@@ -8,77 +8,82 @@ enum PlayerState {
 }
 
 class PlayerStateMachine {
+  private player: Phaser.Physics.Arcade.Sprite;
   private currentState: PlayerState;
 
-  constructor() {
+  constructor(player: Phaser.Physics.Arcade.Sprite) {
+    this.player = player;
     this.currentState = PlayerState.Idle;
   }
 
-  public getCurrentState(): PlayerState {
-    return this.currentState;
-  }
-
-  public handleInput(input: { up: boolean; down: boolean; left: boolean; right: boolean; shift: boolean }, isOnGround: boolean): void {
+  update(inputManager: InputManager, isOnGround: boolean, verticalVelocity: number) {
     switch (this.currentState) {
       case PlayerState.Idle:
-        if (input.right || input.left) {
+        if (inputManager.inputs.left || inputManager.inputs.right) {
           this.currentState = PlayerState.Running;
-        } else if (input.up && isOnGround) {
+        } else if (inputManager.inputs.up) {
           this.currentState = PlayerState.Jumping;
-        } else if (input.shift) {
+        } else if (inputManager.inputs.shift) {
           this.currentState = PlayerState.Grappling;
         }
         break;
       case PlayerState.Running:
-        if (input.up && isOnGround) {
+        if (inputManager.inputs.up) {
           this.currentState = PlayerState.Jumping;
         } else if (!isOnGround) {
           this.currentState = PlayerState.Falling;
-        } else if (input.shift) {
+        } else if (inputManager.inputs.shift) {
           this.currentState = PlayerState.Grappling;
-        } else if (!input.right && !input.left) {
+        } else if (!inputManager.inputs.left && !inputManager.inputs.right) {
           this.currentState = PlayerState.Idle;
         }
         break;
       case PlayerState.Jumping:
-        if (!isOnGround) {
+        if (verticalVelocity > 0) {
           this.currentState = PlayerState.Falling;
-        } else if (input.shift) {
+        } else if (inputManager.inputs.shift) {
           this.currentState = PlayerState.Grappling;
-        } else if (input.right || input.left) {
+        } else if (inputManager.inputs.left || inputManager.inputs.right) {
           this.currentState = PlayerState.Running;
-        } else {
+        } else if (isOnGround) {
           this.currentState = PlayerState.Idle;
         }
         break;
       case PlayerState.Grappling:
-        if (!input.shift) {
+        if (verticalVelocity > 0) {
           this.currentState = PlayerState.Falling;
-        } else if (input.up) {
-          this.currentState = PlayerState.Gliding;
+        } else if (inputManager.inputs.left || inputManager.inputs.right) {
+          this.currentState = PlayerState.Running;
         } else if (isOnGround) {
           this.currentState = PlayerState.Idle;
         }
         break;
       case PlayerState.Falling:
-        if (isOnGround) {
+        if (inputManager.inputs.shift) {
+          this.currentState = PlayerState.Grappling;
+        } else if (isOnGround) {
           this.currentState = PlayerState.Idle;
         }
         break;
       case PlayerState.Gliding:
-        if (!input.up) {
-          this.currentState = PlayerState.Falling;
-        } else if (isOnGround) {
+        if (isOnGround) {
           this.currentState = PlayerState.Idle;
         }
         break;
     }
   }
 
-  public updateVerticalVelocity(velocityY: number): void {
-    if (this.currentState === PlayerState.Jumping && velocityY >= 0) {
-      this.currentState = PlayerState.Falling;
-    }
+  getCurrentState(): PlayerState {
+    return this.currentState;
+  }
+
+  printCurrentState() {
+    const stateText = this.player.scene.add.text(this.player.x, this.player.y - 20, PlayerState[this.currentState], {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000'
+    });
+    stateText.setOrigin(0.5, 0.5);
   }
 }
 

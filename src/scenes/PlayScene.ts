@@ -4,7 +4,7 @@ import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import InputManager from "../utils/InputManager";
 import { TILE_SIZE } from "../utils/Constants";
-import { PlayerStateMachine, PlayerState } from "../utils/PlayerStateMachine";
+import { PlayerStateMachine } from "../utils/PlayerStateMachine";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -19,7 +19,6 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
 	private playerStateMachine!: PlayerStateMachine;
-	private stateText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -76,13 +75,6 @@ class PlayScene extends Phaser.Scene {
 			fontSize: "16px",
 		});
 		this.inputManager = new InputManager(this);
-		this.playerStateMachine = new PlayerStateMachine();
-
-		this.stateText = this.add.text(10, 50, "State: Idle", {
-			fontSize: "16px",
-			color: "#ffffff",
-			backgroundColor: "#000000"
-		});
 	}
 
 	createPlayer(x: number, y: number) {
@@ -94,10 +86,13 @@ class PlayScene extends Phaser.Scene {
 		this.player.setCollideWorldBounds(true);
 		this.updateHyper();
 		this.player.setOrigin(0.5, 0.5);
+		this.playerStateMachine = new PlayerStateMachine(this.player);
 	}
 
 	update() {
 		this.inputManager.updateInputs();
+
+		this.playerStateMachine.update(this.inputManager, this.player.body?.blocked.down, this.player.body?.velocity.y);
 
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
@@ -106,32 +101,33 @@ class PlayScene extends Phaser.Scene {
 			this.increaseHyper();
 		}
 
-		const isOnGround = this.player.body?.blocked.down;
-		this.playerStateMachine.handleInput(this.inputManager.inputs, isOnGround);
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
 
-		switch (this.playerStateMachine.getCurrentState()) {
-			case PlayerState.Idle:
+		if (!this.grapplingHookDeployed) {
+			if (this.inputManager.inputs.left) {
+				this.player.setVelocityX(-160);
+			} else if (this.inputManager.inputs.right) {
+				this.player.setVelocityX(160);
+			} else {
 				this.player.setVelocityX(0);
-				break;
-			case PlayerState.Running:
-				if (this.inputManager.inputs.left) {
-					this.player.setVelocityX(-160);
-				} else if (this.inputManager.inputs.right) {
-					this.player.setVelocityX(160);
-				}
-				break;
-			case PlayerState.Jumping:
-				this.player.setVelocityY(this.hyperValues[this.hyper].jump);
-				break;
-			case PlayerState.Grappling:
+			}
+		}
+
+		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
+			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+		}
+
+		if (this.inputManager.inputs.shift) {
+			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
 				this.player.setVelocityX(0);
 				this.deployGrapplingHook();
-				break;
-			case PlayerState.Falling:
-				break;
-			case PlayerState.Gliding:
-				this.player.setVelocityY(-160);
-				break;
+			}
+		} else {
+			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
+				this.retractGrapplingHook();
+			}
 		}
 
 		if (this.grapplingHookDeployed) {
@@ -146,7 +142,6 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		this.updateHud();
-		this.updateStateText();
 	}
 
 	decreaseHyper() {
@@ -169,11 +164,6 @@ class PlayScene extends Phaser.Scene {
 
 	updateHud() {
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
-	}
-
-	updateStateText() {
-		const state = PlayerState[this.playerStateMachine.getCurrentState()];
-		this.stateText.setText(`State: ${state}`);
 	}
 
 	drawGrapplingHook() {
