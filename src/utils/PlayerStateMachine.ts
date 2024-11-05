@@ -4,13 +4,11 @@ class PlayerStateMachine {
   private currentState: string;
   private player: Phaser.Physics.Arcade.Sprite;
   private hyperValues: { gravity: number; jump: number }[];
-  private hyper: number;
 
-  constructor(player: Phaser.Physics.Arcade.Sprite, hyperValues: { gravity: number; jump: number }[], hyper: number) {
+  constructor(player: Phaser.Physics.Arcade.Sprite, hyperValues: { gravity: number; jump: number }[]) {
     this.currentState = "Idle";
     this.player = player;
     this.hyperValues = hyperValues;
-    this.hyper = hyper;
   }
 
   update(input: InputManager) {
@@ -18,28 +16,33 @@ class PlayerStateMachine {
   }
 
   enterState(state: string) {
+    this.exitState(this.currentState);
     this.currentState = state;
+
     switch (state) {
       case "Idle":
         this.player.setVelocityX(0);
         break;
       case "Running":
-        // Velocity will be set in handleInput based on direction
+        // Velocity will be set based on input
         break;
       case "Jumping":
-        this.player.setVelocityY(this.hyperValues[this.hyper].jump);
+        this.player.setVelocityY(this.hyperValues[0].jump);
         break;
       case "Grappling":
         this.player.setVelocityX(0);
         break;
       case "Gliding":
-        // Velocity will be set in handleInput based on direction
+        // Velocity will be set based on input
+        break;
+      case "Falling":
+        // Gravity will handle the falling velocity
         break;
     }
   }
 
   exitState(state: string) {
-    // Clean up any state-specific variables or conditions if needed
+    // Clean up any state-specific variables or conditions
   }
 
   getCurrentState() {
@@ -58,42 +61,33 @@ class PlayerStateMachine {
         }
         break;
       case "Running":
-        if (input.inputs.left) {
-          this.player.setVelocityX(-160);
-        } else if (input.inputs.right) {
-          this.player.setVelocityX(160);
-        } else {
-          this.enterState("Idle");
-        }
         if (input.inputs.up && this.player.body?.blocked.down) {
           this.enterState("Jumping");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
+        } else if (!input.inputs.left && !input.inputs.right) {
+          this.enterState("Idle");
         }
         break;
       case "Jumping":
         if (input.inputs.left || input.inputs.right) {
           this.enterState("Gliding");
+        } else if (this.player.body?.velocity.y > 0) {
+          this.enterState("Falling");
         }
         break;
       case "Grappling":
         if (!input.inputs.shift) {
           this.enterState("Idle");
         }
-        if (input.inputs.up) {
-          this.player.setVelocityY(-160);
-        } else if (input.inputs.down) {
-          this.player.setVelocityY(160);
-        } else {
-          this.player.setVelocityY(0);
-        }
         break;
       case "Gliding":
-        if (input.inputs.left) {
-          this.player.setVelocityX(-160);
-        } else if (input.inputs.right) {
-          this.player.setVelocityX(160);
-        } else {
+        if (this.player.body?.velocity.y > 0) {
+          this.enterState("Falling");
+        }
+        break;
+      case "Falling":
+        if (this.player.body?.blocked.down) {
           this.enterState("Idle");
         }
         break;

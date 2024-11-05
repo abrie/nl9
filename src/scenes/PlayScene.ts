@@ -19,7 +19,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
 	private playerStateMachine!: PlayerStateMachine;
-	private stateText!: Phaser.GameObjects.Text;
+	private playerStateText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -75,11 +75,11 @@ class PlayScene extends Phaser.Scene {
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
 		});
-		this.stateText = this.add.text(10, 50, "State: Idle", {
+		this.inputManager = new InputManager(this);
+		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues);
+		this.playerStateText = this.add.text(10, 50, "State: Idle", {
 			fontSize: "12px",
 		});
-		this.inputManager = new InputManager(this);
-		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues, this.hyper);
 	}
 
 	createPlayer(x: number, y: number) {
@@ -105,18 +105,7 @@ class PlayScene extends Phaser.Scene {
 
 		this.playerStateMachine.update(this.inputManager);
 
-		if (this.inputManager.inputs.shift) {
-			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
-				this.player.setVelocityX(0);
-				this.deployGrapplingHook();
-			}
-		} else {
-			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
-				this.retractGrapplingHook();
-			}
-		}
-
-		if (this.grapplingHookDeployed) {
+		if (this.playerStateMachine.getCurrentState() === "Grappling") {
 			if (this.inputManager.inputs.up) {
 				this.player.setVelocityY(-160);
 			} else if (this.inputManager.inputs.down) {
@@ -150,7 +139,7 @@ class PlayScene extends Phaser.Scene {
 
 	updateHud() {
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
-		this.stateText.setText(`State: ${this.playerStateMachine.getCurrentState()}`);
+		this.playerStateText.setText(`State: ${this.playerStateMachine.getCurrentState()}`);
 	}
 
 	drawGrapplingHook() {
