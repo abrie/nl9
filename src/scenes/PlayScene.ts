@@ -91,7 +91,7 @@ class PlayScene extends Phaser.Scene {
 
 	update() {
 		this.inputManager.updateInputs();
-		this.playerStateMachine.update();
+		this.playerStateMachine.update(this.inputManager.inputs);
 
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
