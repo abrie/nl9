@@ -1,13 +1,16 @@
 import Phaser from "phaser";
+import PlayerStateMachine from "./PlayerStateMachine";
 
 class InputManager {
   private scene: Phaser.Scene;
   public inputs: { up: boolean; down: boolean; left: boolean; right: boolean; x: boolean; c: boolean; shift: boolean };
   private keys: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; x: Phaser.Input.Keyboard.Key; c: Phaser.Input.Keyboard.Key; shift: Phaser.Input.Keyboard.Key };
+  private playerStateMachine: PlayerStateMachine;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, playerStateMachine: PlayerStateMachine) {
     this.scene = scene;
     this.inputs = { up: false, down: false, left: false, right: false, x: false, c: false, shift: false };
+    this.playerStateMachine = playerStateMachine;
 
     if (!this.scene.input.keyboard) {
       throw new Error("Keyboard input is not available.");
@@ -33,6 +36,8 @@ class InputManager {
     this.inputs.x = this.keys.x.isDown;
     this.inputs.c = this.keys.c.isDown;
     this.inputs.shift = this.keys.shift.isDown;
+
+    this.playerStateMachine.update();
   }
 }
 
