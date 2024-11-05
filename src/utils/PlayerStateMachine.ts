@@ -16,15 +16,13 @@ class PlayerStateMachine {
   }
 
   enterState(state: string) {
-    this.exitState(this.currentState);
     this.currentState = state;
-
     switch (state) {
       case "Idle":
         this.player.setVelocityX(0);
         break;
       case "Running":
-        // Velocity will be set based on input
+        // Horizontal velocity will be set in handleInput method
         break;
       case "Jumping":
         this.player.setVelocityY(this.hyperValues[0].jump);
@@ -33,16 +31,16 @@ class PlayerStateMachine {
         this.player.setVelocityX(0);
         break;
       case "Gliding":
-        // Velocity will be set based on input
+        // Horizontal velocity will be set in handleInput method
         break;
       case "Falling":
-        // Gravity will handle the falling velocity
+        this.player.setVelocityY(0);
         break;
     }
   }
 
   exitState(state: string) {
-    // Clean up any state-specific variables or conditions
+    // Clean up any variables or conditions related to the current state
   }
 
   getCurrentState() {
@@ -61,12 +59,17 @@ class PlayerStateMachine {
         }
         break;
       case "Running":
+        if (input.inputs.left) {
+          this.player.setVelocityX(-160);
+        } else if (input.inputs.right) {
+          this.player.setVelocityX(160);
+        } else {
+          this.enterState("Idle");
+        }
         if (input.inputs.up && this.player.body?.blocked.down) {
           this.enterState("Jumping");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
-        } else if (!input.inputs.left && !input.inputs.right) {
-          this.enterState("Idle");
         }
         break;
       case "Jumping":
@@ -77,12 +80,23 @@ class PlayerStateMachine {
         }
         break;
       case "Grappling":
+        if (input.inputs.up) {
+          this.player.setVelocityY(-160);
+        } else if (input.inputs.down) {
+          this.player.setVelocityY(160);
+        } else {
+          this.player.setVelocityY(0);
+        }
         if (!input.inputs.shift) {
           this.enterState("Idle");
         }
         break;
       case "Gliding":
-        if (this.player.body?.velocity.y > 0) {
+        if (input.inputs.left) {
+          this.player.setVelocityX(-160);
+        } else if (input.inputs.right) {
+          this.player.setVelocityX(160);
+        } else {
           this.enterState("Falling");
         }
         break;

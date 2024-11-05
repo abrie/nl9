@@ -105,14 +105,18 @@ class PlayScene extends Phaser.Scene {
 
 		this.playerStateMachine.update(this.inputManager);
 
-		if (this.playerStateMachine.getCurrentState() === "Grappling") {
-			if (this.inputManager.inputs.up) {
-				this.player.setVelocityY(-160);
-			} else if (this.inputManager.inputs.down) {
-				this.player.setVelocityY(160);
-			} else {
-				this.player.setVelocityY(0);
+		if (this.inputManager.inputs.shift) {
+			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
+				this.player.setVelocityX(0);
+				this.deployGrapplingHook();
 			}
+		} else {
+			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
+				this.retractGrapplingHook();
+			}
+		}
+
+		if (this.grapplingHookDeployed) {
 			this.drawGrapplingHook();
 		}
 
