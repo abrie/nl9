@@ -19,8 +19,8 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
 	private playerStateMachine!: PlayerStateMachine;
-	private playerStateText!: Phaser.GameObjects.Text;
-	private playerStateHistoryText!: Phaser.GameObjects.Text;
+	private stateText!: Phaser.GameObjects.Text;
+	private lastStatesText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -78,10 +78,10 @@ class PlayScene extends Phaser.Scene {
 		});
 		this.inputManager = new InputManager(this);
 		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues);
-		this.playerStateText = this.add.text(10, 50, "State: Idle", {
+		this.stateText = this.add.text(10, 50, "State: Idle", {
 			fontSize: "12px",
 		});
-		this.playerStateHistoryText = this.add.text(10, 70, "State History: ", {
+		this.lastStatesText = this.add.text(10, 70, "Last States: ", {
 			fontSize: "12px",
 		});
 	}
@@ -109,18 +109,7 @@ class PlayScene extends Phaser.Scene {
 
 		this.playerStateMachine.update(this.inputManager);
 
-		if (this.inputManager.inputs.shift) {
-			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
-				this.player.setVelocityX(0);
-				this.deployGrapplingHook();
-			}
-		} else {
-			if (this.grapplingHookDeployed && !this.grapplingHookRetracting) {
-				this.retractGrapplingHook();
-			}
-		}
-
-		if (this.grapplingHookDeployed) {
+		if (this.playerStateMachine.getCurrentState() === "Grappling") {
 			this.drawGrapplingHook();
 		}
 
@@ -147,8 +136,8 @@ class PlayScene extends Phaser.Scene {
 
 	updateHud() {
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
-		this.playerStateText.setText(`State: ${this.playerStateMachine.getCurrentState()}`);
-		this.playerStateHistoryText.setText(`State History: ${this.playerStateMachine.getStateHistory().join(", ")}`);
+		this.stateText.setText(`State: ${this.playerStateMachine.getCurrentState()}`);
+		this.lastStatesText.setText(`Last States: ${this.playerStateMachine.getLastStates().join(", ")}`);
 	}
 
 	drawGrapplingHook() {
