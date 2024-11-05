@@ -2,53 +2,86 @@ import InputManager from "./InputManager";
 
 class PlayerStateMachine {
   private currentState: string;
+  private player: Phaser.Physics.Arcade.Sprite;
+  private hyperValues: { gravity: number; jump: number }[];
 
-  constructor() {
+  constructor(player: Phaser.Physics.Arcade.Sprite, hyperValues: { gravity: number; jump: number }[]) {
     this.currentState = "Idle";
+    this.player = player;
+    this.hyperValues = hyperValues;
   }
 
-  update(input: InputManager, isOnGround: boolean) {
-    this.handleInput(input, isOnGround);
+  update(input: InputManager) {
+    this.handleInput(input);
   }
 
   enterState(state: string) {
     this.currentState = state;
-    // Add logic for entering a new state if needed
+    switch (state) {
+      case "Idle":
+        this.player.setVelocityX(0);
+        break;
+      case "Running":
+        // Velocity will be set based on input in handleInput method
+        break;
+      case "Jumping":
+        this.player.setVelocityY(this.hyperValues[0].jump); // Assuming hyper is 0 for simplicity
+        break;
+      case "Grappling":
+        this.player.setVelocityX(0);
+        break;
+    }
   }
 
   exitState(state: string) {
-    // Add logic for exiting the current state if needed
+    // Clean up any state-specific variables or conditions here
   }
 
   getCurrentState() {
     return this.currentState;
   }
 
-  handleInput(input: InputManager, isOnGround: boolean) {
+  handleInput(input: InputManager) {
     switch (this.currentState) {
       case "Idle":
         if (input.inputs.left || input.inputs.right) {
           this.enterState("Running");
+        } else if (input.inputs.up && this.player.body?.blocked.down) {
+          this.enterState("Jumping");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
-        } else if (input.inputs.up && isOnGround) {
-          this.enterState("Jumping");
         }
         break;
       case "Running":
-        if (input.inputs.up && isOnGround) {
+        if (input.inputs.left) {
+          this.player.setVelocityX(-160);
+        } else if (input.inputs.right) {
+          this.player.setVelocityX(160);
+        } else {
+          this.enterState("Idle");
+        }
+        if (input.inputs.up && this.player.body?.blocked.down) {
           this.enterState("Jumping");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
         }
         break;
       case "Jumping":
-        // Add logic for handling input while in the Jumping state
+        if (this.player.body?.blocked.down) {
+          this.enterState("Idle");
+        }
         break;
       case "Grappling":
-        // Add logic for handling input while in the Grappling state
-        break;
-      default:
+        if (input.inputs.up) {
+          this.player.setVelocityY(-160);
+        } else if (input.inputs.down) {
+          this.player.setVelocityY(160);
+        } else {
+          this.player.setVelocityY(0);
+        }
+        if (!input.inputs.shift) {
+          this.enterState("Idle");
+        }
         break;
     }
   }

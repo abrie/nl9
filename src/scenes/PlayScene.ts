@@ -75,7 +75,7 @@ class PlayScene extends Phaser.Scene {
 			fontSize: "16px",
 		});
 		this.inputManager = new InputManager(this);
-		this.playerStateMachine = new PlayerStateMachine();
+		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues);
 	}
 
 	createPlayer(x: number, y: number) {
@@ -91,7 +91,6 @@ class PlayScene extends Phaser.Scene {
 
 	update() {
 		this.inputManager.updateInputs();
-		this.playerStateMachine.update(this.inputManager, this.player.body.blocked.down);
 
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
@@ -100,15 +99,7 @@ class PlayScene extends Phaser.Scene {
 			this.increaseHyper();
 		}
 
-		if (!this.grapplingHookDeployed) {
-			if (this.inputManager.inputs.left) {
-				this.player.setVelocityX(-160);
-			} else if (this.inputManager.inputs.right) {
-				this.player.setVelocityX(160);
-			} else {
-				this.player.setVelocityX(0);
-			}
-		}
+		this.playerStateMachine.update(this.inputManager);
 
 		if (this.inputManager.inputs.shift) {
 			if (!this.grapplingHookDeployed && !this.grapplingHookDeploying) {
@@ -122,13 +113,6 @@ class PlayScene extends Phaser.Scene {
 		}
 
 		if (this.grapplingHookDeployed) {
-			if (this.inputManager.inputs.up) {
-				this.player.setVelocityY(-160);
-			} else if (this.inputManager.inputs.down) {
-				this.player.setVelocityY(160);
-			} else {
-				this.player.setVelocityY(0);
-			}
 			this.drawGrapplingHook();
 		}
 
