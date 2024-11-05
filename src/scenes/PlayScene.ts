@@ -20,6 +20,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookAnchorY: number | null;
 	private playerStateMachine!: PlayerStateMachine;
 	private playerStateText!: Phaser.GameObjects.Text;
+	private playerStateHistoryText!: Phaser.GameObjects.Text;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -78,6 +79,9 @@ class PlayScene extends Phaser.Scene {
 		this.inputManager = new InputManager(this);
 		this.playerStateMachine = new PlayerStateMachine(this.player, this.hyperValues);
 		this.playerStateText = this.add.text(10, 50, "State: Idle", {
+			fontSize: "12px",
+		});
+		this.playerStateHistoryText = this.add.text(10, 70, "State History: ", {
 			fontSize: "12px",
 		});
 	}
@@ -144,6 +148,7 @@ class PlayScene extends Phaser.Scene {
 	updateHud() {
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
 		this.playerStateText.setText(`State: ${this.playerStateMachine.getCurrentState()}`);
+		this.playerStateHistoryText.setText(`State History: ${this.playerStateMachine.getStateHistory().join(", ")}`);
 	}
 
 	drawGrapplingHook() {

@@ -4,11 +4,13 @@ class PlayerStateMachine {
   private currentState: string;
   private player: Phaser.Physics.Arcade.Sprite;
   private hyperValues: { gravity: number; jump: number }[];
+  private stateHistory: string[];
 
   constructor(player: Phaser.Physics.Arcade.Sprite, hyperValues: { gravity: number; jump: number }[]) {
     this.currentState = "Idle";
     this.player = player;
     this.hyperValues = hyperValues;
+    this.stateHistory = [];
   }
 
   update(input: InputManager) {
@@ -16,6 +18,10 @@ class PlayerStateMachine {
   }
 
   enterState(state: string) {
+    this.stateHistory.push(this.currentState);
+    if (this.stateHistory.length > 4) {
+      this.stateHistory.shift();
+    }
     this.currentState = state;
     switch (state) {
       case "Idle":
@@ -45,6 +51,10 @@ class PlayerStateMachine {
 
   getCurrentState() {
     return this.currentState;
+  }
+
+  getStateHistory() {
+    return this.stateHistory;
   }
 
   handleInput(input: InputManager) {
