@@ -8,9 +8,7 @@ class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
 	private player!: Phaser.Physics.Arcade.Sprite;
 	private grapplingHook!: Phaser.GameObjects.Graphics;
-	private movementMode: number;
 	private acceleration: number;
-	private modeText!: Phaser.GameObjects.Text;
 	private hyper: number;
 	private hyperText!: Phaser.GameObjects.Text;
 	private hyperValues: { gravity: number; jump: number }[];
@@ -24,7 +22,6 @@ class PlayScene extends Phaser.Scene {
 	constructor() {
 		super({ key: "PlayScene" });
 		this.mapManager = new MapManager(this);
-		this.movementMode = 1;
 		this.acceleration = 300;
 		this.hyper = 0;
 		this.hyperValues = [
@@ -75,10 +72,6 @@ class PlayScene extends Phaser.Scene {
 			lineStyle: { width: 2, color: 0x00ff00 },
 		});
 
-		this.modeText = this.add.text(10, 10, "Mode: 1", {
-			fontSize: "16px",
-			fill: "#fff",
-		});
 		this.hyperText = this.add.text(10, 30, "Hyper: 0", {
 			fontSize: "16px",
 			fill: "#fff",
@@ -96,9 +89,6 @@ class PlayScene extends Phaser.Scene {
 	update() {
 		this.inputManager.updateInputs();
 
-		if (this.inputManager.inputs.z) {
-			this.toggleMovementMode();
-		}
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
 		}
@@ -110,25 +100,13 @@ class PlayScene extends Phaser.Scene {
 			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
-		if (this.movementMode === 1) {
-			if (!this.grapplingHookDeployed) {
-				if (this.inputManager.inputs.left) {
-					this.player.setVelocityX(-160);
-				} else if (this.inputManager.inputs.right) {
-					this.player.setVelocityX(160);
-				} else {
-					this.player.setVelocityX(0);
-				}
-			}
-		} else if (this.movementMode === 2) {
-			if (!this.grapplingHookDeployed) {
-				if (this.inputManager.inputs.left) {
-					this.player.setAccelerationX(-this.acceleration);
-				} else if (this.inputManager.inputs.right) {
-					this.player.setAccelerationX(this.acceleration);
-				} else {
-					this.player.setAccelerationX(0);
-				}
+		if (!this.grapplingHookDeployed) {
+			if (this.inputManager.inputs.left) {
+				this.player.setVelocityX(-160);
+			} else if (this.inputManager.inputs.right) {
+				this.player.setVelocityX(160);
+			} else {
+				this.player.setVelocityX(0);
 			}
 		}
 
@@ -163,11 +141,6 @@ class PlayScene extends Phaser.Scene {
 		this.updateHud();
 	}
 
-	toggleMovementMode() {
-		this.movementMode = this.movementMode === 1 ? 2 : 1;
-		this.updateHud();
-	}
-
 	decreaseHyper() {
 		if (this.hyper > 0) {
 			this.hyper--;
@@ -187,7 +160,6 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	updateHud() {
-		this.modeText.setText(`Mode: ${this.movementMode}`);
 		this.hyperText.setText(`Hyper: ${this.hyper}`);
 	}
 
