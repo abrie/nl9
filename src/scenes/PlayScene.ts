@@ -91,17 +91,13 @@ class PlayScene extends Phaser.Scene {
 
 	update() {
 		this.inputManager.updateInputs();
-		this.playerStateMachine.update(this.inputManager);
+		this.playerStateMachine.update(this.inputManager, this.player.body.blocked.down);
 
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
 		}
 		if (this.inputManager.inputs.c) {
 			this.increaseHyper();
-		}
-
-		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
-			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
 		if (!this.grapplingHookDeployed) {
@@ -112,10 +108,6 @@ class PlayScene extends Phaser.Scene {
 			} else {
 				this.player.setVelocityX(0);
 			}
-		}
-
-		if (this.inputManager.inputs.up && this.player.body?.blocked.down) {
-			this.player.setVelocityY(this.hyperValues[this.hyper].jump);
 		}
 
 		if (this.inputManager.inputs.shift) {

@@ -7,8 +7,8 @@ class PlayerStateMachine {
     this.currentState = "Idle";
   }
 
-  update(input: InputManager) {
-    this.handleInput(input);
+  update(input: InputManager, isOnGround: boolean) {
+    this.handleInput(input, isOnGround);
   }
 
   enterState(state: string) {
@@ -24,17 +24,19 @@ class PlayerStateMachine {
     return this.currentState;
   }
 
-  handleInput(input: InputManager) {
+  handleInput(input: InputManager, isOnGround: boolean) {
     switch (this.currentState) {
       case "Idle":
         if (input.inputs.left || input.inputs.right) {
           this.enterState("Running");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
+        } else if (input.inputs.up && isOnGround) {
+          this.enterState("Jumping");
         }
         break;
       case "Running":
-        if (input.inputs.up) {
+        if (input.inputs.up && isOnGround) {
           this.enterState("Jumping");
         } else if (input.inputs.shift) {
           this.enterState("Grappling");
