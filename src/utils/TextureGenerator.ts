@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TILE_SIZE } from './Constants';
 
 export function generateSolidColorTexture(scene: Phaser.Scene, name: string, color: number, width: number, height: number): string {
   const graphics = new Phaser.GameObjects.Graphics(scene);

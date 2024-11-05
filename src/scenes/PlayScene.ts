@@ -3,6 +3,7 @@ import MapManager from "../utils/MapManager";
 import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import InputManager from "../utils/InputManager";
+import { TILE_SIZE } from "../utils/Constants";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -40,7 +41,7 @@ class PlayScene extends Phaser.Scene {
 
 	preload() {
 		this.mapManager.preload();
-		generateSolidColorTexture(this, "player", 0x800080, 32, 32);
+		generateSolidColorTexture(this, "player", 0x800080, TILE_SIZE, TILE_SIZE);
 	}
 
 	create() {
@@ -80,7 +81,7 @@ class PlayScene extends Phaser.Scene {
 	}
 
 	createPlayer(x: number, y: number) {
-		this.player = this.physics.add.sprite(x * 32 + 16, y * 32 + 16, "player");
+		this.player = this.physics.add.sprite(x * TILE_SIZE + 16, y * TILE_SIZE + 16, "player");
 		this.player.setCollideWorldBounds(true);
 		this.updateHyper();
 		this.player.setOrigin(0.5, 0.5);
@@ -179,13 +180,13 @@ class PlayScene extends Phaser.Scene {
 		this.grapplingHookLength = 0;
 		const playerX = this.player.x;
 		const playerY = this.player.y;
-		const tileX = Math.floor(playerX / 32);
-		const tileY = Math.floor(playerY / 32);
+		const tileX = Math.floor(playerX / TILE_SIZE);
+		const tileY = Math.floor(playerY / TILE_SIZE);
 
 		const firstWallTileY = this.mapManager.findFirstWallTileAbove(tileX, tileY);
 		if (firstWallTileY !== null) {
-			this.grapplingHookLength = playerY - (firstWallTileY + 1) * 32;
-			this.grapplingHookAnchorY = (firstWallTileY + 1) * 32;
+			this.grapplingHookLength = playerY - (firstWallTileY + 1) * TILE_SIZE;
+			this.grapplingHookAnchorY = (firstWallTileY + 1) * TILE_SIZE;
 			this.drawGrapplingHook();
 		}
 

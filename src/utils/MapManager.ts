@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { generateSolidColorTexture } from "./TextureGenerator";
 import MapGenerator from "./MapGenerator";
+import { TILE_SIZE } from "./Constants";
 
 class MapManager {
 	private tilemap!: Phaser.Tilemaps.Tilemap;
@@ -12,8 +13,8 @@ class MapManager {
 	}
 
 	preload() {
-		generateSolidColorTexture(this.scene, "unfilled", 0x00aa00, 32, 32);
-		generateSolidColorTexture(this.scene, "filled", 0x000000, 32, 32);
+		generateSolidColorTexture(this.scene, "unfilled", 0x00aa00, TILE_SIZE, TILE_SIZE);
+		generateSolidColorTexture(this.scene, "filled", 0x000000, TILE_SIZE, TILE_SIZE);
 	}
 
 	create() {
@@ -43,15 +44,15 @@ class MapManager {
 				data: map,
 				width: width,
 				height: height,
-				tileWidth: 32,
-				tileHeight: 32,
+				tileWidth: TILE_SIZE,
+				tileHeight: TILE_SIZE,
 			});
 
 			const unfilledTileset = this.tilemap.addTilesetImage(
 				"unfilled",
 				undefined,
-				32,
-				32,
+				TILE_SIZE,
+				TILE_SIZE,
 				0,
 				0,
 				1,
@@ -60,8 +61,8 @@ class MapManager {
 			const filledTileset = this.tilemap.addTilesetImage(
 				"filled",
 				undefined,
-				32,
-				32,
+				TILE_SIZE,
+				TILE_SIZE,
 				0,
 				0,
 				2,
