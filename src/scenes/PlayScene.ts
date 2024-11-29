@@ -4,6 +4,7 @@ import MapGenerator from "../utils/MapGenerator";
 import { generateSolidColorTexture } from "../utils/TextureGenerator";
 import InputManager from "../utils/InputManager";
 import { TILE_SIZE } from "../utils/Constants";
+import { PlayerStateMachine } from "../utils/PlayerStateMachine";
 
 class PlayScene extends Phaser.Scene {
 	private mapManager: MapManager;
@@ -17,6 +18,7 @@ class PlayScene extends Phaser.Scene {
 	private grapplingHookDeploying: boolean;
 	private grapplingHookRetracting: boolean;
 	private grapplingHookAnchorY: number | null;
+	private playerStateMachine!: PlayerStateMachine;
 
 	constructor() {
 		super({ key: "PlayScene" });
@@ -84,10 +86,13 @@ class PlayScene extends Phaser.Scene {
 		this.player.setCollideWorldBounds(true);
 		this.updateHyper();
 		this.player.setOrigin(0.5, 0.5);
+		this.playerStateMachine = new PlayerStateMachine(this.player);
 	}
 
 	update() {
 		this.inputManager.updateInputs();
+
+		this.playerStateMachine.update(this.inputManager, this.player.body?.blocked.down, this.player.body?.velocity.y);
 
 		if (this.inputManager.inputs.x) {
 			this.decreaseHyper();
